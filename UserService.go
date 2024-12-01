@@ -72,6 +72,6 @@ func testingDB(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Error connecting to the database")
 		return
 	}
-	fmt.Println(db)
+	fmt.Println("Database has been successfully connected!")
 	defer db.Close()
 }
