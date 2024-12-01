@@ -21,7 +21,7 @@ type User struct {
 	ContactNo      string
 	MembershipTier string
 	DateJoined     time.Time
-	asswordHash    string
+	PasswordHash   string
 }
 
 var db *sql.DB
