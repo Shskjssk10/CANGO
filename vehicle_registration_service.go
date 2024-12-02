@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -22,6 +23,13 @@ type User struct {
 	PasswordHash         string
 	IsActivated          int
 	VerificationCodeHash string
+}
+
+type Car struct {
+	CarID      int
+	Model      string
+	PlateNo    string
+	RentalRate int
 }
 
 var db *sql.DB
@@ -60,6 +68,8 @@ func main() {
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
 	// Routes
+	router.HandleFunc("/api/v1/cars", getAllCars).Methods("GET")
+	router.HandleFunc("/api/v1/car/{id}", getCar).Methods("GET")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8001"}),
@@ -70,6 +80,66 @@ func main() {
 	fmt.Printf("Listening at port %d\n", port)
 	url := fmt.Sprintf(":%d", port)
 	log.Fatal(http.ListenAndServe(url, corsHandler))
+}
+
+// Get All Cars
+func getAllCars(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	rows, err := db.Query("SELECT * FROM Car")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Errror executing DB query")
+		return
+	}
+	defer rows.Close()
+
+	var listOfCars []Car
+
+	for rows.Next() {
+		var c Car
+		_ = rows.Scan(&c.CarID, &c.Model, &c.PlateNo, &c.RentalRate)
+		listOfCars = append(listOfCars, c)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(listOfCars)
+	defer db.Close()
+}
+
+// Get Specific Car
+func getCar(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	carID := params["id"]
+
+	// Read from Database
+	var car Car
+	query := "SELECT * FROM Car WHERE CarID = ?"
+	err = db.QueryRow(query, carID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Return User Data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(car)
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 // Test Database Connection
