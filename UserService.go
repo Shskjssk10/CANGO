@@ -5,8 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 
+	"github.com/MakMoinee/go-mith/pkg/email"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -16,12 +19,14 @@ import (
 var port int = 8000
 
 type User struct {
-	UserID         int
-	Name           string
-	EmailAddr      string
-	ContactNo      string
-	MembershipTier string
-	PasswordHash   string
+	UserID               int
+	Name                 string
+	EmailAddr            string
+	ContactNo            string
+	MembershipTier       string
+	PasswordHash         string
+	IsActivated          int
+	VerificationCodeHash string
 }
 
 var db *sql.DB
@@ -63,6 +68,9 @@ func main() {
 	router.HandleFunc("/api/v1/getUser/{id}", getUser).Methods("GET")
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
 	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
+	router.HandleFunc("/api/v1/sendVerificationEmail", sendVerificationEmail).Methods("POST")
+	router.HandleFunc("/api/v1/activateAccount", verifyVerificationCode).Methods("PUT")
+	router.HandleFunc("/api/v1/update/{id}", updateUser).Methods("PUT")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8000"}),
@@ -166,6 +174,118 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login Unsuccessful")
 }
 
+// Send Email
+func sendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	// Generating Code Hash
+	var verificationCode string
+	for i := 0; i < 6; i++ {
+		num := rand.Intn(10)
+		verificationCode += strconv.Itoa(num)
+	}
+
+	//Hash Verification Code
+	hashVerificationCode, err := bcrypt.GenerateFromPassword([]byte(verificationCode), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
+	// Get User Email from Body
+	var userEmail struct {
+		Email string
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&userEmail)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// // Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Update the user's record with the hashed verification code
+	_, err = db.Exec("UPDATE User SET VerificationCodeHash = ? WHERE EmailAddr = ?", hashVerificationCode, userEmail.Email)
+	if err != nil {
+		http.Error(w, "Failed to update user record", http.StatusInternalServerError)
+		return
+	}
+
+	// Send Email Verification Code
+	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", "lfsrljaancjibxtm")
+
+	isEmailSent, err := emailService.SendEmail(userEmail.Email, "Verification Email", fmt.Sprintf("Your verification code is: %s", verificationCode))
+	if err != nil {
+		log.Fatalf("Error sending email: %s", err)
+	}
+
+	if isEmailSent {
+		log.Println("Email Send Successfully")
+	} else {
+		log.Println("Failed to send email")
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Verification code sent successfully")
+	w.WriteHeader(http.StatusOK)
+}
+
+// Verify Verification Code
+func verifyVerificationCode(w http.ResponseWriter, r *http.Request) {
+	// Read Data from Body
+	var credentials struct {
+		Email            string
+		VerificationCode string
+	}
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Read from Database
+	var user User
+	query := "SELECT * FROM User WHERE EmailAddr = ?"
+	err = db.QueryRow(query, credentials.Email).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Compare verification code
+	err = bcrypt.CompareHashAndPassword([]byte(user.VerificationCodeHash), []byte(credentials.VerificationCode))
+	if err != nil {
+		// Return unsuccessful
+		http.Error(w, "Invalid verification code", http.StatusUnauthorized)
+		fmt.Println("Verification Unsuccessful")
+		return
+	}
+
+	// Update User Account is Verified
+	_, err = db.Exec("UPDATE User SET IsActivated = 1 WHERE EmailAddr = ?", credentials.Email)
+	if err != nil {
+		http.Error(w, "Failed to update user record", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Account has been activiated!")
+	w.WriteHeader(http.StatusOK)
+}
+
 // Get User
 func getUser(w http.ResponseWriter, r *http.Request) {
 	// Connect to Database
@@ -192,6 +312,45 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	// Return User Data
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+// Update User Information
+func updateUser(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Read Data from Body
+	var updatedUser User
+	err = json.NewDecoder(r.Body).Decode(&updatedUser)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	userID := params["id"]
+
+	_, err = db.Exec(`
+		UPDATE User
+		SET Name = ?, ContactNo = ?, EmailAddr = ?
+		WHERE UserID = ?`, updatedUser.Name, updatedUser.ContactNo, updatedUser.EmailAddr, userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Something went wrong with updating")
+		return
+	}
+
+	message := fmt.Sprintf("%s has been updated", updatedUser.Name)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(message)
 
 	w.WriteHeader(http.StatusAccepted)
 }

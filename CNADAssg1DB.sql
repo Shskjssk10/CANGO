@@ -12,7 +12,9 @@ CREATE TABLE User (
     EmailAddr VARCHAR(100) UNIQUE NOT NULL, 
     ContactNo VARCHAR(8) UNIQUE NOT NULL CHECK (ContactNo NOT LIKE '%[^0-9]%'),
     MemberTier ENUM('Basic', 'Premium', 'VIP') NOT NULL DEFAULT 'Basic',
-	PasswordHash VARCHAR(100) NOT NULL
+	PasswordHash VARCHAR(100) NOT NULL,
+	IsActivated TINYINT(1) NOT NULL DEFAULT 0, 
+    VerificationCodeHash VARCHAR(100) NOT NULL
 );
 
 -- Car Table 
@@ -55,12 +57,11 @@ CREATE TABLE Booking (
 -- Data Creation
 
 -- Inserting data into User table
-INSERT INTO User (Name, EmailAddr, ContactNo, MemberTier, PasswordHash)
+INSERT INTO User (Name, EmailAddr, ContactNo, MemberTier, PasswordHash, IsActivated, VerificationCodeHash)
 VALUES 
-('Caden Toh', 'cadentohjunyi@gmail.com', '84469588', 'Basic', '$2a$10$WMkzkeV/CroPDMPwrk8Q4ONTN7wh71K0ObS.KypcCF541lwaRwm3a') --Shskjssk10,
-('John Doe', 'john@example.com', '12345678', 'Premium', 'hashed_password1'),
-('Jane Smith', 'jane@example.com', '87654321', 'Basic', 'hashed_password2'),
-('Michael Jones', 'michael@example.com', '98765432', 'VIP', 'hashed_password3');
+('John Doe', 'john@example.com', '12345678', 'Premium', 'hashed_password1', 1, 'hash2'),
+('Jane Smith', 'jane@example.com', '87654321', 'Basic', 'hashed_password2', 1, 'hash3'),
+('Michael Jones', 'michael@example.com', '98765432', 'VIP', 'hashed_password3', 1, 'hash4');
 
 -- Inserting data into Car table
 INSERT INTO Car (Model, PlateNo, RentalRate)
