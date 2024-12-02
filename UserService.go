@@ -59,6 +59,7 @@ func main() {
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
+	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8000"}),
@@ -106,6 +107,47 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode("User Successully Created!")
 
 	w.WriteHeader(http.StatusAccepted)
+}
+
+func loginUser(w http.ResponseWriter, r *http.Request) {
+	var credentials struct {
+		Email    string
+		Password string
+	}
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	var user User
+	query := "SELECT * FROM User WHERE EmailAddr = ?"
+	err = db.QueryRow(query, credentials.Email).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
+	if err == sql.ErrNoRows {
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		return
+	} else if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Compare passwords
+	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(credentials.Password))
+	if err != nil {
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		fmt.Println("Login Unsuccessful")
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
+	fmt.Println("Login Unsuccessful")
 }
 
 func testingDB(w http.ResponseWriter, r *http.Request) {
