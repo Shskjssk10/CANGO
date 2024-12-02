@@ -86,6 +86,7 @@ func main() {
 
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
 	router.HandleFunc("/api/v1/booking/car/{id}", getBookingByCarID).Methods("GET")
+	router.HandleFunc("/api/v1/booking/user/{id}", getBookingByUserID).Methods("GET")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8001"}),
@@ -212,6 +213,42 @@ func getBookingByCarID(w http.ResponseWriter, r *http.Request) {
 
 	// Execute Query
 	rows, err := db.Query("SELECT * FROM Booking WHERE CarID = ?", carID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Errror executing DB query")
+		return
+	}
+	defer rows.Close()
+
+	// Read Data
+	var listOfBooking []Booking
+
+	for rows.Next() {
+		var b Booking
+		_ = rows.Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		listOfBooking = append(listOfBooking, b)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(listOfBooking)
+	defer db.Close()
+}
+
+// List Bookings by UserID
+func getBookingByUserID(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	userID := params["id"]
+
+	// Execute Query
+	rows, err := db.Query("SELECT * FROM Booking WHERE UserID = ?", userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Errror executing DB query")
