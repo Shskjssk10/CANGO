@@ -14,6 +14,8 @@ import (
 
 var port int = 8001
 
+// Type Structures
+
 type User struct {
 	UserID               int
 	Name                 string
@@ -81,7 +83,9 @@ func main() {
 	// Routes
 	router.HandleFunc("/api/v1/cars", getAllCars).Methods("GET")
 	router.HandleFunc("/api/v1/car/{id}", getCar).Methods("GET")
+
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
+	router.HandleFunc("/api/v1/booking/car/{id}", getBookingByCarID).Methods("GET")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8001"}),
@@ -93,6 +97,8 @@ func main() {
 	url := fmt.Sprintf(":%d", port)
 	log.Fatal(http.ListenAndServe(url, corsHandler))
 }
+
+//=========================== CAR RELATED ===========================
 
 // Get All Cars
 func getAllCars(w http.ResponseWriter, r *http.Request) {
@@ -154,6 +160,8 @@ func getCar(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+//=========================== BOOKING RELATED ===========================
+
 // Create Booking
 func postBooking(w http.ResponseWriter, r *http.Request) {
 	// Connect to Database
@@ -186,6 +194,42 @@ func postBooking(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("Booking Posted Successfully!")
 	w.WriteHeader(http.StatusOK)
+}
+
+// List Bookings by CarID
+func getBookingByCarID(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	carID := params["id"]
+
+	// Execute Query
+	rows, err := db.Query("SELECT * FROM Booking WHERE CarID = ?", carID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Errror executing DB query")
+		return
+	}
+	defer rows.Close()
+
+	// Read Data
+	var listOfBooking []Booking
+
+	for rows.Next() {
+		var b Booking
+		_ = rows.Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		listOfBooking = append(listOfBooking, b)
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(listOfBooking)
+	defer db.Close()
 }
 
 // Test Database Connection
