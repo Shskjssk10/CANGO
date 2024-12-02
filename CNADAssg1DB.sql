@@ -13,7 +13,7 @@ CREATE TABLE User (
     ContactNo VARCHAR(8) UNIQUE NOT NULL CHECK (ContactNo NOT LIKE '%[^0-9]%'),
     MemberTier ENUM('Basic', 'Premium', 'VIP') NOT NULL DEFAULT 'Basic',
 	PasswordHash VARCHAR(100) NOT NULL,
-	IsActivated TINYINT(1) NOT NULL, 
+	IsActivated TINYINT(1) NOT NULL DEFAULT 0, 
     VerificationCodeHash VARCHAR(100) NOT NULL
 );
 

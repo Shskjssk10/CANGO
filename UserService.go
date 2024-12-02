@@ -102,7 +102,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 
 	// Write into Database
 	_, err = db.Exec(`
-		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash)
+		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash, IsActivated, )
 		VALUES 
 		(?, ?, ?, ?)`, newUser.Name, newUser.EmailAddr, newUser.ContactNo, hashedPassword)
 	if err != nil {
