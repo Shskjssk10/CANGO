@@ -57,6 +57,7 @@ CREATE TABLE Booking (
 -- Inserting data into User table
 INSERT INTO User (Name, EmailAddr, ContactNo, MemberTier, PasswordHash)
 VALUES 
+('Caden Toh', 'cadentohjunyi@gmail.com', '84469588', 'Basic', '$2a$10$WMkzkeV/CroPDMPwrk8Q4ONTN7wh71K0ObS.KypcCF541lwaRwm3a') --Shskjssk10,
 ('John Doe', 'john@example.com', '12345678', 'Premium', 'hashed_password1'),
 ('Jane Smith', 'jane@example.com', '87654321', 'Basic', 'hashed_password2'),
 ('Michael Jones', 'michael@example.com', '98765432', 'VIP', 'hashed_password3');
