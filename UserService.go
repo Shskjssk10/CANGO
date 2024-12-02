@@ -26,6 +26,7 @@ type User struct {
 
 var db *sql.DB
 
+// Function to connect Database -- MUST BE USED AT ALL CRUD FUNCTIONS
 func connectToDB() (*sql.DB, error) {
 	if db != nil {
 		// Check if the database connection is already established
@@ -55,9 +56,10 @@ func connectToDB() (*sql.DB, error) {
 func main() {
 	router := mux.NewRouter()
 
-	// Routes
+	// Test Initial Database Connection
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
+	// Routes
 	router.HandleFunc("/api/v1/getUser/{id}", getUser).Methods("GET")
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
 	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
@@ -72,7 +74,9 @@ func main() {
 	log.Fatal(http.ListenAndServe(url, corsHandler))
 }
 
+// Register User
 func registerUser(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
 	db, err := connectToDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -80,6 +84,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Read Data from Body
 	var newUser User
 	err = json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
@@ -94,6 +99,7 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Write into Database
 	_, err = db.Exec(`
 		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash)
 		VALUES 
@@ -104,13 +110,16 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Return Successful
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("User Successully Created!")
 
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// User Login
 func loginUser(w http.ResponseWriter, r *http.Request) {
+	// Read Data from Body
 	var credentials struct {
 		Email    string
 		Password string
@@ -121,6 +130,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Connect to Database
 	db, err := connectToDB()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -128,6 +138,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Retrieve User to be login
 	var user User
 	query := "SELECT * FROM User WHERE EmailAddr = ?"
 	err = db.QueryRow(query, credentials.Email).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
@@ -142,15 +153,19 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	// Compare passwords
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(credentials.Password))
 	if err != nil {
+		// Return unsuccessful
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		fmt.Println("Login Unsuccessful")
 		return
 	}
+
+	// Return successful
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 	fmt.Println("Login Unsuccessful")
 }
 
+// Get User
 func getUser(w http.ResponseWriter, r *http.Request) {
 	// Connect to Database
 	db, err := connectToDB()
@@ -160,9 +175,11 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Reads parameters
 	params := mux.Vars(r)
 	userID := params["id"]
 
+	// Read from Database
 	var user User
 	query := "SELECT * FROM User WHERE UserID = ?"
 	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
@@ -170,6 +187,8 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	// Return User Data
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(user)
 
