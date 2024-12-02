@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
@@ -16,12 +18,13 @@ import (
 var port int = 8000
 
 type User struct {
-	UserID         int
-	Name           string
-	EmailAddr      string
-	ContactNo      string
-	MembershipTier string
-	PasswordHash   string
+	UserID               int
+	Name                 string
+	EmailAddr            string
+	ContactNo            string
+	MembershipTier       string
+	PasswordHash         string
+	VerificationCodeHash string
 }
 
 var db *sql.DB
@@ -100,11 +103,25 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Generating Code Hash
+	var verificationCode string
+	for i := 0; i < 6; i++ {
+		num := rand.Intn(10)
+		verificationCode += strconv.Itoa(num)
+	}
+
+	// Hash Verification Code
+	hashCode, err := bcrypt.GenerateFromPassword([]byte(verificationCode), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
 	// Write into Database
 	_, err = db.Exec(`
-		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash, IsActivated, )
+		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash, VerificationCodeHash)
 		VALUES 
-		(?, ?, ?, ?)`, newUser.Name, newUser.EmailAddr, newUser.ContactNo, hashedPassword)
+		(?, ?, ?, ?, ?)`, newUser.Name, newUser.EmailAddr, newUser.ContactNo, hashedPassword, hashCode)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
