@@ -83,3 +83,15 @@ VALUES
 ('2024-06-01', '2024-06-03', '09:00:00', '17:00:00', 1, 1, 1),
 ('2024-06-15', '2024-06-16', '10:00:00', '16:00:00', 2, 2, 2),
 ('2024-07-01', '2024-07-02', '11:00:00', '15:00:00', 3, 3, 3);
+
+DELIMITER //
+CREATE TRIGGER updatePaymentOnBookingDelete
+AFTER DELETE ON Booking
+FOR EACH ROW
+BEGIN
+    UPDATE Payment
+    SET Status = 'Refunded'
+    WHERE PaymentID = OLD.PaymentID;
+END;
+//
+DELIMITER ;
