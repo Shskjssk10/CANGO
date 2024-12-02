@@ -69,6 +69,7 @@ func main() {
 		handlers.AllowedMethods([]string{"GET", "POST", "OPTIONS", "PUT"}),
 	)(router)
 
+	// Print port
 	fmt.Printf("Listening at port %d\n", port)
 	url := fmt.Sprintf(":%d", port)
 	log.Fatal(http.ListenAndServe(url, corsHandler))
@@ -195,6 +196,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+// Test Database Connection
 func testingDB(w http.ResponseWriter, r *http.Request) {
 	db, err := connectToDB()
 	if err != nil {
