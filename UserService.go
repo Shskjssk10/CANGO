@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/MakMoinee/go-mith/pkg/email"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -66,6 +67,7 @@ func main() {
 	router.HandleFunc("/api/v1/getUser/{id}", getUser).Methods("GET")
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
 	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
+	router.HandleFunc("/api/v1/sendVerificationEmail", sendVerificationEmail).Methods("POST")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8000"}),
@@ -103,25 +105,11 @@ func registerUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Generating Code Hash
-	var verificationCode string
-	for i := 0; i < 6; i++ {
-		num := rand.Intn(10)
-		verificationCode += strconv.Itoa(num)
-	}
-
-	// Hash Verification Code
-	hashCode, err := bcrypt.GenerateFromPassword([]byte(verificationCode), bcrypt.DefaultCost)
-	if err != nil {
-		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
-		return
-	}
-
 	// Write into Database
 	_, err = db.Exec(`
-		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash, VerificationCodeHash)
+		INSERT INTO User (Name, EmailAddr, ContactNo, PasswordHash)
 		VALUES 
-		(?, ?, ?, ?, ?)`, newUser.Name, newUser.EmailAddr, newUser.ContactNo, hashedPassword, hashCode)
+		(?, ?, ?, ?)`, newUser.Name, newUser.EmailAddr, newUser.ContactNo, hashedPassword)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
@@ -181,6 +169,67 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 	fmt.Println("Login Unsuccessful")
+}
+
+// Send Email
+func sendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	// Generating Code Hash
+	var verificationCode string
+	for i := 0; i < 6; i++ {
+		num := rand.Intn(10)
+		verificationCode += strconv.Itoa(num)
+	}
+
+	//Hash Verification Code
+	hashVerificationCode, err := bcrypt.GenerateFromPassword([]byte(verificationCode), bcrypt.DefaultCost)
+	if err != nil {
+		http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+		return
+	}
+
+	// Get User Email from Body
+	var userEmail struct {
+		Email string
+	}
+
+	err = json.NewDecoder(r.Body).Decode(&userEmail)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// // Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Update the user's record with the hashed verification code
+	_, err = db.Exec("UPDATE User SET VerificationCodeHash = ? WHERE EmailAddr = ?", hashVerificationCode, userEmail.Email)
+	if err != nil {
+		http.Error(w, "Failed to update user record", http.StatusInternalServerError)
+		return
+	}
+
+	// Send Email Verification Code
+	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", "lfsrljaancjibxtm")
+
+	isEmailSent, err := emailService.SendEmail(userEmail.Email, "Verification Email", fmt.Sprintf("Your verification code is: %s", verificationCode))
+	if err != nil {
+		log.Fatalf("Error sending email: %s", err)
+	}
+
+	if isEmailSent {
+		log.Println("Email Send Successfully")
+	} else {
+		log.Println("Failed to send email")
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Verification code sent successfully")
+	w.WriteHeader(http.StatusOK)
 }
 
 // Get User

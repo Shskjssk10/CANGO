@@ -10,6 +10,9 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/MakMoinee/go-mith v1.2.12 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	golang.org/x/crypto v0.29.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+	gopkg.in/mail.v2 v2.3.1 // indirect
 )
