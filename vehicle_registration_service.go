@@ -32,6 +32,17 @@ type Car struct {
 	RentalRate int
 }
 
+type Booking struct {
+	BookingID int
+	StartTime string
+	EndTime   string
+	StartDate string
+	EndDate   string
+	CarID     int
+	UserID    int
+	PaymentID int
+}
+
 var db *sql.DB
 
 // Function to connect Database -- MUST BE USED AT ALL CRUD FUNCTIONS
@@ -70,6 +81,7 @@ func main() {
 	// Routes
 	router.HandleFunc("/api/v1/cars", getAllCars).Methods("GET")
 	router.HandleFunc("/api/v1/car/{id}", getCar).Methods("GET")
+	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8001"}),
@@ -140,6 +152,40 @@ func getCar(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(car)
 
 	w.WriteHeader(http.StatusAccepted)
+}
+
+// Create Booking
+func postBooking(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Read Data from Body
+	var newBooking Booking
+	err = json.NewDecoder(r.Body).Decode(&newBooking)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Posting Booking into Database
+	_, err = db.Exec(`
+		INSERT INTO Booking (StartDate, EndDate, StartTime, EndTime, UserID, CarID, PaymentID)
+		VALUES 
+		(?, ?, ?, ?, ?, ?, ?)`, newBooking.StartDate, newBooking.EndDate, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.PaymentID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Something went wrong with creation")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Booking Posted Successfully!")
+	w.WriteHeader(http.StatusOK)
 }
 
 // Test Database Connection
