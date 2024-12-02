@@ -25,6 +25,7 @@ type User struct {
 	ContactNo            string
 	MembershipTier       string
 	PasswordHash         string
+	IsActivated          int
 	VerificationCodeHash string
 }
 
@@ -68,6 +69,7 @@ func main() {
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
 	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
 	router.HandleFunc("/api/v1/sendVerificationEmail", sendVerificationEmail).Methods("POST")
+	router.HandleFunc("/api/v1/activateAccount", verifyVerificationCode).Methods("PUT")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8000"}),
@@ -229,6 +231,57 @@ func sendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("Verification code sent successfully")
+	w.WriteHeader(http.StatusOK)
+}
+
+// Verify Verification Code
+func verifyVerificationCode(w http.ResponseWriter, r *http.Request) {
+	// Read Data from Body
+	var credentials struct {
+		Email            string
+		VerificationCode string
+	}
+	err := json.NewDecoder(r.Body).Decode(&credentials)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer db.Close()
+
+	// Read from Database
+	var user User
+	query := "SELECT * FROM User WHERE EmailAddr = ?"
+	err = db.QueryRow(query, credentials.Email).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Compare verification code
+	err = bcrypt.CompareHashAndPassword([]byte(user.VerificationCodeHash), []byte(credentials.VerificationCode))
+	if err != nil {
+		// Return unsuccessful
+		http.Error(w, "Invalid verification code", http.StatusUnauthorized)
+		fmt.Println("Verification Unsuccessful")
+		return
+	}
+
+	// Update User Account is Verified
+	_, err = db.Exec("UPDATE User SET IsActivated = 1 WHERE EmailAddr = ?", credentials.Email)
+	if err != nil {
+		http.Error(w, "Failed to update user record", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Account has been activiated!")
 	w.WriteHeader(http.StatusOK)
 }
 
