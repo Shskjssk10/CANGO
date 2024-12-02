@@ -86,6 +86,7 @@ func main() {
 
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
 	router.HandleFunc("/api/v1/booking/{id}", updateBooking).Methods("PUT")
+	router.HandleFunc("/api/v1/booking/{id}", deleteBooking).Methods("DELETE")
 	router.HandleFunc("/api/v1/booking/car/{id}", getBookingByCarID).Methods("GET")
 	router.HandleFunc("/api/v1/booking/user/{id}", getBookingByUserID).Methods("GET")
 
@@ -304,6 +305,35 @@ func updateBooking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	message := fmt.Sprintf("Booking %s has been successfully updated!", bookingID)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(message)
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+// Delete Booking
+func deleteBooking(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	bookingID := params["id"]
+
+	// Delete Booking
+	_, err = db.Exec("DELETE FROM Booking WHERE BookingID = ?", bookingID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Errror executing DB query")
+		return
+	}
+
+	message := fmt.Sprintf("Booking %s has been deleted", bookingID)
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(message)
 
