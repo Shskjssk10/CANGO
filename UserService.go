@@ -58,6 +58,7 @@ func main() {
 	// Routes
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
+	router.HandleFunc("/api/v1/getUser/{id}", getUser).Methods("GET")
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
 	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
 
@@ -148,6 +149,31 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
 	fmt.Println("Login Unsuccessful")
+}
+
+func getUser(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	params := mux.Vars(r)
+	userID := params["id"]
+
+	var user User
+	query := "SELECT * FROM User WHERE UserID = ?"
+	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(user)
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func testingDB(w http.ResponseWriter, r *http.Request) {
