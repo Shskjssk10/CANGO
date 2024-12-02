@@ -85,6 +85,7 @@ func main() {
 	router.HandleFunc("/api/v1/car/{id}", getCar).Methods("GET")
 
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
+	router.HandleFunc("/api/v1/booking/{id}", updateBooking).Methods("PUT")
 	router.HandleFunc("/api/v1/booking/car/{id}", getBookingByCarID).Methods("GET")
 	router.HandleFunc("/api/v1/booking/user/{id}", getBookingByUserID).Methods("GET")
 
@@ -267,6 +268,46 @@ func getBookingByUserID(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(listOfBooking)
 	defer db.Close()
+}
+
+// Update Booking
+func updateBooking(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	bookingID := params["id"]
+
+	// Read Data from Body
+	var newBooking Booking
+	err = json.NewDecoder(r.Body).Decode(&newBooking)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Execute Query
+	_, err = db.Exec(`
+		UPDATE Booking
+		SET StartDate = ?, EndDate = ?, StartTime = ?, EndTime = ?
+		WHERE BookingID = ?`, newBooking.StartDate, newBooking.EndDate, newBooking.StartTime, newBooking.EndTime, bookingID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Something went wrong with updating")
+		return
+	}
+
+	message := fmt.Sprintf("Booking %s has been successfully updated!", bookingID)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(message)
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 // Test Database Connection
