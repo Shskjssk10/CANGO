@@ -7,12 +7,14 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/MakMoinee/go-mith/pkg/email"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -216,8 +218,12 @@ func sendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Getting Secret Code
+	godotenv.Load()
+	var emailKey = os.Getenv("EMAIL_KEY")
+
 	// Send Email Verification Code
-	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", "lfsrljaancjibxtm")
+	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", emailKey)
 
 	isEmailSent, err := emailService.SendEmail(userEmail.Email, "Verification Email", fmt.Sprintf("Your verification code is: %s", verificationCode))
 	if err != nil {

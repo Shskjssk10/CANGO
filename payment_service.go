@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/MakMoinee/go-mith/pkg/email"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 var port int = 8002
@@ -184,8 +186,12 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Getting Secret Code
+	godotenv.Load()
+	var emailKey = os.Getenv("EMAIL_KEY")
+
 	// Send Email Verification Code
-	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", "lfsrljaancjibxtm")
+	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", emailKey)
 
 	var messageBody string
 
