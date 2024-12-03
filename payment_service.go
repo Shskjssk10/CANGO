@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,22 +27,13 @@ type User struct {
 	VerificationCodeHash string
 }
 
-type Car struct {
-	CarID      int
-	Model      string
-	PlateNo    string
-	RentalRate int
-}
-
-type Booking struct {
-	BookingID int
-	StartTime string
-	EndTime   string
-	StartDate string
-	EndDate   string
-	CarID     int
-	UserID    int
-	PaymentID int
+type Payment struct {
+	PaymentID   int
+	Amount      int
+	DateCreated string
+	Status      string
+	UserID      int
+	CarID       int
 }
 
 var db *sql.DB
@@ -80,6 +72,7 @@ func main() {
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
 	// Routes
+	router.HandleFunc("/api/v1/booking", postPayment).Methods("POST")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8002"}),
@@ -90,6 +83,40 @@ func main() {
 	fmt.Printf("Listening at port %d\n", port)
 	url := fmt.Sprintf(":%d", port)
 	log.Fatal(http.ListenAndServe(url, corsHandler))
+}
+
+// Create Payment
+func postPayment(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Read Data from Body
+	var newPayment Payment
+	err = json.NewDecoder(r.Body).Decode(&newPayment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Posting Payment into Database
+	_, err = db.Exec(`
+		INSERT INTO Payment (Amount, UserID, CarID)
+		VALUES 
+		(?, ?, ?)`, newPayment.Amount, newPayment.UserID, newPayment.CarID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Something went wrong with creation")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode("Payment Posted Successfully!")
+	w.WriteHeader(http.StatusOK)
 }
 
 // Test Database Connection
