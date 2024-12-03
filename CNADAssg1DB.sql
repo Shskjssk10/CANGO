@@ -25,15 +25,24 @@ CREATE TABLE Car (
     RentalRate INT NOT NULL
 );
 
+CREATE TABLE Promotion (
+	PromotionCode INT PRIMARY KEY AUTO_INCREMENT,
+    Name VARCHAR(50) NOT NULL,
+    Description VARCHAR(100) NOT NULL, 
+    Discount DECIMAL(10,2) NOT NULL
+);
+
 -- Payment Table
 CREATE TABLE Payment (
 	PaymentID INT PRIMARY KEY AUTO_INCREMENT,
     Amount DECIMAL(10, 2) NOT NULL, 
     DateCreated TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     Status ENUM('Pending', 'Successful', 'Refunded', 'Unsuccessful') NOT NULL DEFAULT 'Pending',
+    PromotionCode INT NULL,
     UserID INT NOT NULL, 
     CarID INT NOT NULL,
     
+    FOREIGN KEY(PromotionCode) REFERENCES Promotion(PromotionCode),
     FOREIGN KEY(UserID) REFERENCES User(UserID),
     FOREIGN KEY(CarID) REFERENCES Car(CarID)
 );
@@ -70,12 +79,19 @@ VALUES
 ('Honda Civic', 'DEF5678', 40),
 ('Tesla Model 3', 'GHI987', 70);
 
--- Inserting data into Payment table
-INSERT INTO Payment (Amount, Status, UserID, CarID)
+-- Inserting data into Promotion table
+INSERT INTO Promotion (Name, Description, Discount)
 VALUES 
-(200, 'Pending', 1, 1),
-(150, 'Successful', 2, 2),
-(250, 'Successful', 3, 3);
+('Christmas Discount', 'A limited time offer discount in lieu of the upcoming festivities', 0.1),
+('Premium Member Discount', 'DEF5678', 0.05),
+('VIP Member Discount', 'GHI987', 0.1);
+
+-- Inserting data into Payment table
+INSERT INTO Payment (Amount, Status, PromotionCode, UserID, CarID)
+VALUES 
+(200, 'Pending', NULL, 1, 1),
+(150, 'Successful', NULL, 2, 2),
+(250, 'Successful',NULL, 3, 3);
 
 -- Inserting data into Booking table
 INSERT INTO Booking (StartDate, EndDate, StartTime, EndTime, UserID, CarID, PaymentID)
