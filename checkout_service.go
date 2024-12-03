@@ -35,7 +35,7 @@ func main() {
 	)(router)
 
 	// Routes
-	router.HandleFunc("/api/v1/create-payment-intent", handleCreatePaymentIntent)
+	router.HandleFunc("/api/v1/create-payment-intent", handleCreatePaymentIntent).Methods("POST")
 
 	// Print port
 	fmt.Printf("Listening at port %d\n", port)
