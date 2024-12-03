@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/MakMoinee/go-mith/pkg/email"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -25,6 +26,24 @@ type User struct {
 	PasswordHash         string
 	IsActivated          int
 	VerificationCodeHash string
+}
+
+type Car struct {
+	CarID      int
+	Model      string
+	PlateNo    string
+	RentalRate int
+}
+
+type Booking struct {
+	BookingID int
+	StartTime string
+	EndTime   string
+	StartDate string
+	EndDate   string
+	CarID     int
+	UserID    int
+	PaymentID int
 }
 
 type Payment struct {
@@ -72,7 +91,8 @@ func main() {
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
 	// Routes
-	router.HandleFunc("/api/v1/booking", postPayment).Methods("POST")
+	router.HandleFunc("/api/v1/payment", postPayment).Methods("POST")
+	router.HandleFunc("/api/v1/paymentConfirmation", sendReceipt).Methods("POST")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8002"}),
@@ -117,6 +137,76 @@ func postPayment(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("Payment Posted Successfully!")
 	w.WriteHeader(http.StatusOK)
+}
+
+func sendReceipt(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Get Payment Details from Body
+	var payment Payment
+
+	err = json.NewDecoder(r.Body).Decode(&payment)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Read Car Details from Database
+	var car Car
+	query := "SELECT * FROM Car WHERE CarID = ?"
+	err = db.QueryRow(query, payment.CarID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Read User Details from Database
+	var user User
+	query = "SELECT * FROM User WHERE UserID = ?"
+	err = db.QueryRow(query, payment.UserID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Execute Query
+	var b Booking
+	query = "SELECT * FROM Booking WHERE PaymentID = ?"
+	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve booking: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Send Email Verification Code
+	emailService := email.NewEmailService(587, "smtp.gmail.com", "pookiebears2006@gmail.com", "lfsrljaancjibxtm")
+
+	var messageBody string
+
+	messageBody = fmt.Sprintf(`
+Dear %s,
+	
+This email confirms your booking for %s from %s %s to %s %s and that payment of %d has been made.
+
+Thank you for trusting us! We hope you have a wonderful time!
+	`, user.Name, car.Model, b.StartDate, b.StartTime, b.EndDate, b.EndTime, payment.Amount)
+
+	isEmailSent, err := emailService.SendEmail(user.EmailAddr, "Payment Confirmed", messageBody)
+	if err != nil {
+		log.Fatalf("Error sending email: %s", err)
+	}
+
+	if isEmailSent {
+		log.Println("Email Send Successfully")
+	} else {
+		log.Println("Failed to send email")
+	}
 }
 
 // Test Database Connection
