@@ -32,6 +32,7 @@ type Car struct {
 	Model      string
 	PlateNo    string
 	RentalRate int
+	Location   string
 }
 
 type Booking struct {
@@ -83,6 +84,7 @@ func main() {
 	// Routes
 	router.HandleFunc("/api/v1/cars", getAllCars).Methods("GET")
 	router.HandleFunc("/api/v1/car/{id}", getCar).Methods("GET")
+	router.HandleFunc("/api/v1/car/{id}", updateCarLocation).Methods("PUT")
 
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
 	router.HandleFunc("/api/v1/booking/{id}", updateBooking).Methods("PUT")
@@ -159,6 +161,46 @@ func getCar(w http.ResponseWriter, r *http.Request) {
 	// Return User Data
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(car)
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
+// Update Car Location
+func updateCarLocation(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	carID := params["id"]
+
+	// Read Data from Body
+	var car Car
+	err = json.NewDecoder(r.Body).Decode(&car)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Execute Query
+	_, err = db.Exec(`
+		UPDATE Car
+		SET Location = ?
+		WHERE CarID = ?`, car.Location, carID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Something went wrong with updating")
+		return
+	}
+
+	message := fmt.Sprintf("Car %s's location has been successfully updated!", carID)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(message)
 
 	w.WriteHeader(http.StatusAccepted)
 }
