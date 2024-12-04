@@ -16,6 +16,18 @@ var port int = 8004
 
 var db *sql.DB
 
+// Data Structure
+type User struct {
+	UserID               int
+	Name                 string
+	EmailAddr            string
+	ContactNo            string
+	MembershipTier       string
+	PasswordHash         string
+	IsActivated          int
+	VerificationCodeHash string
+}
+
 // Function to connect Database -- MUST BE USED AT ALL CRUD FUNCTIONS
 func connectToDB() (*sql.DB, error) {
 	if db != nil {
@@ -81,7 +93,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 	// Read from Database
 	var user User
 	query := "SELECT * FROM User WHERE UserID = ?"
-	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
+	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
 		return
