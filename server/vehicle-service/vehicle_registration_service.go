@@ -127,7 +127,7 @@ func getAllCars(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var c Car
-		_ = rows.Scan(&c.CarID, &c.Model, &c.PlateNo, &c.RentalRate)
+		_ = rows.Scan(&c.CarID, &c.Model, &c.PlateNo, &c.RentalRate, &c.Location)
 		listOfCars = append(listOfCars, c)
 	}
 	w.Header().Set("Content-Type", "application/json")

@@ -1,0 +1,134 @@
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Navbar Styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #3255ED;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.navbar-left {
+    display: flex;
+    align-items: center;
+}
+
+.navbar a.link {
+    text-decoration: none;
+    color: white;
+    margin-right: 15px;
+    font-size: 1rem;
+}
+
+.logo {
+    text-decoration: none;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: white;
+    margin: 0px 40px;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+}
+
+.profile-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+/* Browse Section */
+.browse {
+    padding: 40px 10%;
+    text-align: center;
+}
+
+.browse h1 {
+    font-size: 2.5rem;
+    margin-bottom: 30px;
+}
+
+/* Car List Styles */
+.car-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.car-card {
+    display: flex;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 60%;
+    max-width: 800px;
+}
+
+.car-card img {
+    width: 40%;
+    height: auto;
+    object-fit: cover;
+}
+
+.car-card-content {
+    margin-left: 20px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.car-card-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.car-card-content p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.view-details-btn {
+    padding: 10px 15px;
+    background-color: #3255ED;
+    color: white;
+    text-align: center;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.view-details-btn:hover {
+    background-color: #273bb5;
+}
