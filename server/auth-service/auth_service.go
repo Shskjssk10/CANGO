@@ -68,7 +68,7 @@ func main() {
 
 	// Routes
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
-	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
+	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("POST")
 	router.HandleFunc("/api/v1/sendVerificationEmail", sendVerificationEmail).Methods("POST")
 	router.HandleFunc("/api/v1/activateAccount", verifyVerificationCode).Methods("PUT")
 
@@ -150,7 +150,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	// Retrieve User to be login
 	var user User
 	query := "SELECT * FROM User WHERE EmailAddr = ?"
-	err = db.QueryRow(query, credentials.Email).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
+	err = db.QueryRow(query, credentials.Email).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
 	if err == sql.ErrNoRows {
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
@@ -159,19 +159,29 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Check if Activated
+	if user.IsActivated == 0 {
+		// Return unsuccessful
+		http.Error(w, "Account has not been validated", http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Login Unsuccessful - Account has not been validated"})
+		fmt.Println("Login Unsuccessful - Account has not been validated")
+		return
+	}
+
 	// Compare passwords
 	err = bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(credentials.Password))
 	if err != nil {
 		// Return unsuccessful
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-		fmt.Println("Login Unsuccessful")
+		json.NewEncoder(w).Encode(map[string]string{"message": "Login Unsuccessful - Invalid email or password"})
+		fmt.Println("Login Unsuccessful - Invalid email or password")
 		return
 	}
 
 	// Return successful
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{"message": "Login successful"})
-	fmt.Println("Login Unsuccessful")
+	fmt.Println("Login Successful")
 }
 
 // Send Email
