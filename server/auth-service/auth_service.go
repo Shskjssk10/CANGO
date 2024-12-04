@@ -68,7 +68,7 @@ func main() {
 
 	// Routes
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
-	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
+	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("POST")
 	router.HandleFunc("/api/v1/sendVerificationEmail", sendVerificationEmail).Methods("POST")
 	router.HandleFunc("/api/v1/activateAccount", verifyVerificationCode).Methods("PUT")
 
@@ -163,6 +163,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	if user.IsActivated == 0 {
 		// Return unsuccessful
 		http.Error(w, "Account has not been validated", http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Login Unsuccessful - Account has not been validated"})
 		fmt.Println("Login Unsuccessful - Account has not been validated")
 		return
 	}
@@ -172,6 +173,7 @@ func loginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// Return unsuccessful
 		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]string{"message": "Login Unsuccessful - Invalid email or password"})
 		fmt.Println("Login Unsuccessful - Invalid email or password")
 		return
 	}
