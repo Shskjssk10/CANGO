@@ -62,7 +62,7 @@ func main() {
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
 	// Routes
-	router.HandleFunc("/api/v1/getUser/{id}", getUser).Methods("GET")
+	router.HandleFunc("/api/v1/getUser/{email}", getUser).Methods("GET")
 	router.HandleFunc("/api/v1/update/{id}", updateUser).Methods("PUT")
 
 	corsHandler := handlers.CORS(
@@ -88,12 +88,12 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 	// Reads parameters
 	params := mux.Vars(r)
-	userID := params["id"]
+	userEmail := params["email"]
 
 	// Read from Database
 	var user User
-	query := "SELECT * FROM User WHERE UserID = ?"
-	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
+	query := "SELECT * FROM User WHERE EmailAddr = ?"
+	err = db.QueryRow(query, userEmail).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
 		return

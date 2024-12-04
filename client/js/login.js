@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             "Password": password
         }
 
+        sessionStorage.setItem("EmailAddr", email)
         if (email && password) {
             try {
                 const response = await fetch("http://127.0.0.1:8000/api/v1/loginUser", {
@@ -27,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const result = await response.json(); // Parse the JSON response
                 console.log("Login successfully:", result);
                 alert("Login Successful")
-                window.location.href = "dashboard.html"
+                window.location.href = "homepage.html"
             } catch (error) {
                 alert("Login Unsuccessful - Wrong Email or Password")
                 console.error("Error:", error.message);
