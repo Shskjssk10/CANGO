@@ -22,7 +22,8 @@ CREATE TABLE Car (
 	CarID INT PRIMARY KEY AUTO_INCREMENT,
     Model VARCHAR(20) NOT NULL,
     PlateNo VARCHAR(10) NOT NULL, 
-    RentalRate INT NOT NULL
+    RentalRate INT NOT NULL,
+    Location VARCHAR(100) NOT NULL
 );
 
 CREATE TABLE Promotion (
@@ -64,20 +65,19 @@ CREATE TABLE Booking (
 );
 
 -- Data Creation
-
 -- Inserting data into User table
 INSERT INTO User (Name, EmailAddr, ContactNo, MemberTier, PasswordHash, IsActivated, VerificationCodeHash)
 VALUES 
-('John Doe', 'cadentohjunyi@gmail.com', '12345678', 'Premium', 'hashed_password1', 1, 'hash2'),
+('John Doe', 'johndoe@gmail.com', '12345678', 'Premium', 'hashed_password1', 1, 'hash2'),
 ('Jane Smith', 'jane@example.com', '87654321', 'Basic', 'hashed_password2', 1, 'hash3'),
 ('Michael Jones', 'michael@example.com', '98765432', 'VIP', 'hashed_password3', 1, 'hash4');
 
 -- Inserting data into Car table
-INSERT INTO Car (Model, PlateNo, RentalRate)
+INSERT INTO Car (Model, PlateNo, RentalRate, Location)
 VALUES 
-('Toyota Camry', 'ABC1234', 50),
-('Honda Civic', 'DEF5678', 40),
-('Tesla Model 3', 'GHI987', 70);
+('Toyota Camry', 'ABC1234', 50, 'Lorong Ah Soo'),
+('Honda Civic', 'DEF5678', 40, 'Lorong Ah Soo'),
+('Tesla Model 3', 'GHI987', 70, 'Lorong Ah Soo');
 
 -- Inserting data into Promotion table
 INSERT INTO Promotion (Name, Description, Discount)
