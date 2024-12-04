@@ -1,6 +1,3 @@
-// This is a public sample test API key.
-// Don’t submit any personally identifiable information in requests made with this key.
-// Sign in to see your own test API key embedded in code samples.
 const stripe = Stripe("pk_live_51QRx0kG1MaTqtP836OI6SN7m2MUTT9VjsJuCYH76ByARCNvMiFX0HZQi67TNCLZfYgkgs70wJrHHfodJ3daPItIh00GjYaV6A5");
 
 // The items the customer wants to buy
@@ -51,11 +48,7 @@ async function handleSubmit(e) {
         },
     });
 
-    // This point will only be reached if there is an immediate error when
-    // confirming the payment. Otherwise, your customer will be redirected to
-    // your `return_url`. For some payment methods like iDEAL, your customer will
-    // be redirected to an intermediate site first to authorize the payment, then
-    // redirected to the `return_url`.
+    // When Error occurs
     if (error.type === "card_error" || error.type === "validation_error") {
         showMessage(error.message);
     } else {
