@@ -31,10 +31,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h2>${car.Model}</h2>
                 <p>CANGO newly bought car! Be sure to book it soon!!! </p>
                 <p><strong>Rental Rate</strong>: $${car.RentalRate}/hr</p>
-                <button class="view-details-btn">Book Now!</button>
+                <button class="view-details-btn" data-car-id="${car.CarID}">Book Now!</button>
             </div>
         `;
 
         carList.appendChild(card);
+    });
+
+    // Add event listeners to all "Book Now!" buttons
+    const bookButtons = document.querySelectorAll('.view-details-btn');
+
+    bookButtons.forEach(button => {
+        button.addEventListener('click', event => {
+            const carID = event.target.getAttribute('data-car-id');
+            sessionStorage.setItem("CarID", carID);
+
+            // Redirect to booking.html with query parameters
+            window.location.href = `booking.html`;
+        });
     });
 });

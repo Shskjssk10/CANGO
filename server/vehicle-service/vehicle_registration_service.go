@@ -152,7 +152,7 @@ func getCar(w http.ResponseWriter, r *http.Request) {
 	// Read from Database
 	var car Car
 	query := "SELECT * FROM Car WHERE CarID = ?"
-	err = db.QueryRow(query, carID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate)
+	err = db.QueryRow(query, carID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate, &car.Location)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
 		return

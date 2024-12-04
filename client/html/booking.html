@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking</title>
+    <link rel="stylesheet" href="../css/booking.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="homepage.html" class="logo">CANGO</a>
+            <a href="browse-cars.html" class="link">Browse Cars</a>
+            <a href="view-history.html" class="link">View History</a>
+        </div>
+        <div class="navbar-right">
+            <a href="profile.html">
+                <img src="../images/profile-icon.png" alt="Profile" class="profile-icon">
+            </a>
+        </div>
+    </nav>
+
+    <div class="booking-container">
+        <div class="booking-card">
+            <div class="car-image">
+                <img src="../images/car.png" alt="Car Image">
+            </div>
+            <div class="booking-form">
+                <h2 id="car-placeholder">Book Your Ride</h2>
+                <label for="date">Select Date:</label>
+                <input type="date" id="date" name="date" required>
+
+                <label for="time">Select Time Slots:</label>
+                <div class="time-slots">
+                    <label><input type="checkbox" value="0900-1200" name="timeslot"> 0900 - 1200</label>
+                    <label><input type="checkbox" value="1200-1500" name="timeslot"> 1200 - 1500</label>
+                    <label><input type="checkbox" value="1500-1800" name="timeslot"> 1500 - 1800</label>
+                    <label><input type="checkbox" value="1800-2100" name="timeslot"> 1800 - 2100</label>
+                </div>
+
+                <button type="submit" class="submit-btn">Confirm Booking</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/booking.js"></script>
+</body>
+</html>
