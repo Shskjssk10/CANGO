@@ -14,7 +14,7 @@ CREATE TABLE User (
     MemberTier ENUM('Basic', 'Premium', 'VIP') NOT NULL DEFAULT 'Basic',
 	PasswordHash VARCHAR(100) NOT NULL,
 	IsActivated TINYINT(1) NOT NULL DEFAULT 0, 
-    VerificationCodeHash VARCHAR(100) NOT NULL
+    VerificationCodeHash VARCHAR(100) NULL
 );
 
 -- Car Table 
