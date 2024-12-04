@@ -16,7 +16,6 @@ import (
 	"github.com/stripe/stripe-go/v81"
 	"github.com/stripe/stripe-go/v81/paymentintent"
 	"github.com/stripe/stripe-go/v81/tax/calculation"
-	"github.com/stripe/stripe-go/v81/tax/transaction"
 )
 
 var port int = 8003
@@ -24,7 +23,7 @@ var port int = 8003
 func main() {
 	// Stripe Secret API KEY
 	// Getting Secret Code
-	godotenv.Load()
+	godotenv.Load("../.env")
 	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	router := mux.NewRouter()
@@ -138,16 +137,16 @@ func handleCreatePaymentIntent(w http.ResponseWriter, r *http.Request) {
 }
 
 // Invoke this method in your webhook handler when `payment_intent.succeeded` webhook is received
-func handlePaymentIntentSucceeded(paymentIntent stripe.PaymentIntent) {
-	// Create a Tax Transaction for the successful payment
-	params := &stripe.TaxTransactionCreateFromCalculationParams{
-		Calculation: stripe.String(paymentIntent.Metadata["tax_calculation"]),
-		Reference:   stripe.String("myOrder_123"), // Replace with a unique reference from your checkout/order system
-	}
-	params.AddExpand("line_items")
+// func handlePaymentIntentSucceeded(paymentIntent stripe.PaymentIntent) {
+// 	// Create a Tax Transaction for the successful payment
+// 	params := &stripe.TaxTransactionCreateFromCalculationParams{
+// 		Calculation: stripe.String(paymentIntent.Metadata["tax_calculation"]),
+// 		Reference:   stripe.String("myOrder_123"), // Replace with a unique reference from your checkout/order system
+// 	}
+// 	params.AddExpand("line_items")
 
-	transaction.CreateFromCalculation(params)
-}
+// 	transaction.CreateFromCalculation(params)
+// }
 
 func writeJSON(w http.ResponseWriter, v interface{}) {
 	var buf bytes.Buffer
