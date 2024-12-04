@@ -67,12 +67,10 @@ func main() {
 	router.HandleFunc("/api/v1/test", testingDB).Methods("GET")
 
 	// Routes
-	router.HandleFunc("/api/v1/getUser/{id}", getUser).Methods("GET")
 	router.HandleFunc("/api/v1/registerUser", registerUser).Methods("POST")
 	router.HandleFunc("/api/v1/loginUser", loginUser).Methods("GET")
 	router.HandleFunc("/api/v1/sendVerificationEmail", sendVerificationEmail).Methods("POST")
 	router.HandleFunc("/api/v1/activateAccount", verifyVerificationCode).Methods("PUT")
-	router.HandleFunc("/api/v1/update/{id}", updateUser).Methods("PUT")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8000"}),
@@ -219,7 +217,7 @@ func sendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Getting Secret Code
-	godotenv.Load()
+	godotenv.Load("../.env")
 	var emailKey = os.Getenv("EMAIL_KEY")
 
 	// Send Email Verification Code
@@ -290,75 +288,6 @@ func verifyVerificationCode(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("Account has been activiated!")
 	w.WriteHeader(http.StatusOK)
-}
-
-// Get User
-func getUser(w http.ResponseWriter, r *http.Request) {
-	// Connect to Database
-	db, err := connectToDB()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error connecting to the database")
-		return
-	}
-
-	// Reads parameters
-	params := mux.Vars(r)
-	userID := params["id"]
-
-	// Read from Database
-	var user User
-	query := "SELECT * FROM User WHERE UserID = ?"
-	err = db.QueryRow(query, userID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Return User Data
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(user)
-
-	w.WriteHeader(http.StatusAccepted)
-}
-
-// Update User Information
-func updateUser(w http.ResponseWriter, r *http.Request) {
-	// Connect to Database
-	db, err := connectToDB()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error connecting to the database")
-		return
-	}
-
-	// Read Data from Body
-	var updatedUser User
-	err = json.NewDecoder(r.Body).Decode(&updatedUser)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Reads parameters
-	params := mux.Vars(r)
-	userID := params["id"]
-
-	_, err = db.Exec(`
-		UPDATE User
-		SET Name = ?, ContactNo = ?, EmailAddr = ?
-		WHERE UserID = ?`, updatedUser.Name, updatedUser.ContactNo, updatedUser.EmailAddr, userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Something went wrong with updating")
-		return
-	}
-
-	message := fmt.Sprintf("%s has been updated", updatedUser.Name)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(message)
-
-	w.WriteHeader(http.StatusAccepted)
 }
 
 // Test Database Connection
