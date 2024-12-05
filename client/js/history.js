@@ -29,11 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             <img src="../images/car.png" alt="Car Model" class="card-image">
             <div class="card-details">
                 <h2 class="card-title">${booking.Model}</h2>
-                <p class="card-rate">Rental Rate: $${booking.RentalRate}/day</p>
-                <p class="card-time">Start Time: ${booking.StartTime}</p>
-                <p class="card-date">Start Date: ${booking.StartDate}</p>
+                <p class="card-time">Date ${booking.Date}</p>
+                <p class="card-date">Start Time: ${booking.StartTime}</p>
                 <p class="card-time">End Time: ${booking.EndTime}</p>
-                <p class="card-date">End Date: ${booking.EndDate}</p>
                 <div class="card-buttons">
                     <button class="update-btn" onclick="updateBooking('${booking.BookingID}')">Update</button>
                     <button class="delete-btn" onclick="deleteBooking('${booking.BookingID}')">Delete</button>
@@ -45,8 +43,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Update booking
     window.updateBooking = (bookingID) => {
-        alert(`Redirect to update page for booking ID: ${bookingID}`);
-        // Implement update logic or redirect to an update page
+        sessionStorage.setItem("BookingID", bookingID);
+        window.location.href="update-booking.html"
     };
 
     // Delete booking
@@ -54,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const confirmDelete = confirm("Are you sure you want to delete this booking?");
         if (confirmDelete) {
             try {
-                const response = await fetch(`http://127.0.0.1:8001/api/v1/bookings/${bookingID}`, {
+                const response = await fetch(`http://127.0.0.1:8001/api/v1/booking/${bookingID}`, {
                     method: 'DELETE',
                 });
 
