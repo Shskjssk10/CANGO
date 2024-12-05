@@ -39,9 +39,9 @@ type Booking struct {
 	BookingID int
 	StartTime string
 	EndTime   string
-	StartDate string
-	EndDate   string
+	Date      string
 	CarID     int
+	Model     string
 	UserID    int
 	PaymentID int
 }
@@ -87,6 +87,7 @@ func main() {
 	router.HandleFunc("/api/v1/car/{id}", updateCarLocation).Methods("PUT")
 
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
+	router.HandleFunc("/api/v1/booking/{id}", getBooking).Methods("GET")
 	router.HandleFunc("/api/v1/booking/{id}", updateBooking).Methods("PUT")
 	router.HandleFunc("/api/v1/booking/{id}", deleteBooking).Methods("DELETE")
 	router.HandleFunc("/api/v1/booking/car/{id}", getBookingByCarID).Methods("GET")
@@ -127,7 +128,7 @@ func getAllCars(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var c Car
-		_ = rows.Scan(&c.CarID, &c.Model, &c.PlateNo, &c.RentalRate)
+		_ = rows.Scan(&c.CarID, &c.Model, &c.PlateNo, &c.RentalRate, &c.Location)
 		listOfCars = append(listOfCars, c)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -152,7 +153,7 @@ func getCar(w http.ResponseWriter, r *http.Request) {
 	// Read from Database
 	var car Car
 	query := "SELECT * FROM Car WHERE CarID = ?"
-	err = db.QueryRow(query, carID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate)
+	err = db.QueryRow(query, carID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate, &car.Location)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
 		return
@@ -227,9 +228,9 @@ func postBooking(w http.ResponseWriter, r *http.Request) {
 
 	// Posting Booking into Database
 	_, err = db.Exec(`
-		INSERT INTO Booking (StartDate, EndDate, StartTime, EndTime, UserID, CarID, PaymentID)
+		INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, Model, PaymentID)
 		VALUES 
-		(?, ?, ?, ?, ?, ?, ?)`, newBooking.StartDate, newBooking.EndDate, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.PaymentID)
+		(?, ?, ?, ?, ?, ?, ?)`, newBooking.Date, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.Model, newBooking.PaymentID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
@@ -239,6 +240,36 @@ func postBooking(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("Booking Posted Successfully!")
 	w.WriteHeader(http.StatusOK)
+}
+
+// Get Specific Booking
+func getBooking(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	// Reads parameters
+	params := mux.Vars(r)
+	bookingID := params["id"]
+
+	// Read from Database
+	var b Booking
+	query := "SELECT * FROM Booking WHERE BookingID = ?"
+	err = db.QueryRow(query, bookingID).Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.Model, &b.PaymentID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to retrieve booking: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Return User Data
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(b)
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 // List Bookings by CarID
@@ -269,7 +300,7 @@ func getBookingByCarID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.Model, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -305,7 +336,7 @@ func getBookingByUserID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.Model, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -338,8 +369,8 @@ func updateBooking(w http.ResponseWriter, r *http.Request) {
 	// Execute Query
 	_, err = db.Exec(`
 		UPDATE Booking
-		SET StartDate = ?, EndDate = ?, StartTime = ?, EndTime = ?
-		WHERE BookingID = ?`, newBooking.StartDate, newBooking.EndDate, newBooking.StartTime, newBooking.EndTime, bookingID)
+		SET Date = ?, StartTime = ?, EndTime = ?
+		WHERE BookingID = ?`, newBooking.Date, newBooking.StartTime, newBooking.EndTime, bookingID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with updating")

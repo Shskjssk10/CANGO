@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile Management</title>
+    <link rel="stylesheet" href="../css/profile.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="homepage.html" class="logo">CANGO</a>
+            <a href="browse-cars.html" class="link">Browse Cars</a>
+            <a href="view-history.html" class="link">View History</a>
+        </div>
+        <div class="navbar-right">
+            <a href="profile.html">
+                <img src="../images/profile-icon.png" alt="Profile" class="profile-icon">
+            </a>
+        </div>
+    </nav>
+
+    <main>
+        <section class="profile-section">
+            <h1 id="header">Manage Your Profile</h1>
+            <div class="profile-card">
+                <form class="profile-form" id="profileForm">
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" value="user@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactno">Contact Number</label>
+                        <input type="text" id="contactno" name="contactno" value="12345678" required maxlength="8">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" value="password123" placeholder="Enter your new password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password:</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" placeholder="Re-enter new password">
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn-submit">Save Changes</button>
+                    </div>
+                </form>
+                <div class="status">
+                    <h3>Account Status</h3>
+                    <p id="membership-tier"><strong>Membership Tier:</strong> Basic</p>
+                    <p><strong>Status:</strong> Active</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/profile.js"></script>
+</body>
+</html>

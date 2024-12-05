@@ -10,6 +10,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var port int = 8004
@@ -128,14 +129,36 @@ func updateUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userID := params["id"]
 
-	_, err = db.Exec(`
-		UPDATE User
-		SET Name = ?, ContactNo = ?, EmailAddr = ?
-		WHERE UserID = ?`, updatedUser.Name, updatedUser.ContactNo, updatedUser.EmailAddr, userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Something went wrong with updating")
-		return
+	fmt.Println(updatedUser)
+
+	// If no password is to change
+	if updatedUser.PasswordHash == "" {
+		_, err = db.Exec(`
+			UPDATE User
+			SET ContactNo = ?, EmailAddr = ?
+			WHERE UserID = ?`, updatedUser.ContactNo, updatedUser.EmailAddr, userID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Something went wrong with updating")
+			return
+		}
+	} else { // If there is password to change
+		// Hash password
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updatedUser.PasswordHash), bcrypt.DefaultCost)
+		if err != nil {
+			http.Error(w, "Failed to hash password", http.StatusInternalServerError)
+			return
+		}
+
+		_, err = db.Exec(`
+			UPDATE User
+			SET ContactNo = ?, EmailAddr = ?, PasswordHash = ?
+			WHERE UserID = ?`, updatedUser.ContactNo, updatedUser.EmailAddr, hashedPassword, userID)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			fmt.Println("Something went wrong with updating")
+			return
+		}
 	}
 
 	message := fmt.Sprintf("%s has been updated", updatedUser.Name)

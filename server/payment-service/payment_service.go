@@ -35,15 +35,16 @@ type Car struct {
 	Model      string
 	PlateNo    string
 	RentalRate int
+	Location   string
 }
 
 type Booking struct {
 	BookingID int
 	StartTime string
 	EndTime   string
-	StartDate string
-	EndDate   string
+	Date      string
 	CarID     int
+	Model     string
 	UserID    int
 	PaymentID int
 }
@@ -126,68 +127,62 @@ func postPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Posting Payment into Database
-	_, err = db.Exec(`
-		INSERT INTO Payment (Amount, UserID, CarID)
+	result, err := db.Exec(`
+		INSERT INTO Payment (Amount, Status, UserID, CarID)
 		VALUES 
-		(?, ?, ?)`, newPayment.Amount, newPayment.UserID, newPayment.CarID)
+		(?, 'Successful', ?, ?)`, newPayment.Amount, newPayment.UserID, newPayment.CarID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
 		return
 	}
 
+	// Get the last inserted ID
+	lastInsertId, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error getting last inserted ID")
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Payment Posted Successfully!")
+
+	// Create a response struct
+	type PaymentResponse struct {
+		PaymentID int `json:"PaymentID"`
+	}
+
+	// Create a new PaymentResponse instance
+	response := PaymentResponse{
+		PaymentID: int(lastInsertId),
+	}
+
+	json.NewEncoder(w).Encode(response)
 	w.WriteHeader(http.StatusOK)
 }
 
 func sendReceipt(w http.ResponseWriter, r *http.Request) {
-	// Connect to Database
-	db, err := connectToDB()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error connecting to the database")
-		return
+	// Get Payment Details from Body
+	type Email struct {
+		Name      string
+		EmailAddr string
+		Model     string
+		Date      string
+		StartTime string
+		EndTime   string
+		Amount    int
 	}
 
-	// Get Payment Details from Body
-	var payment Payment
+	var emailDetails Email
 
-	err = json.NewDecoder(r.Body).Decode(&payment)
+	err := json.NewDecoder(r.Body).Decode(&emailDetails)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Read Car Details from Database
-	var car Car
-	query := "SELECT * FROM Car WHERE CarID = ?"
-	err = db.QueryRow(query, payment.CarID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Read User Details from Database
-	var user User
-	query = "SELECT * FROM User WHERE UserID = ?"
-	err = db.QueryRow(query, payment.UserID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Execute Query
-	var b Booking
-	query = "SELECT * FROM Booking WHERE PaymentID = ?"
-	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve booking: %v", err), http.StatusInternalServerError)
-		return
-	}
-
 	// Getting Secret Code
-	godotenv.Load("../.env")
+	godotenv.Load("../../.env")
 	var emailKey = os.Getenv("EMAIL_KEY")
 
 	// Send Email Verification Code
@@ -198,12 +193,12 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 	messageBody = fmt.Sprintf(`
 Dear %s,
 	
-This email confirms your booking for %s from %s %s to %s %s and that payment of %d has been made.
+This email confirms your booking for %s on %s %s to %s and that payment of $%d has been made.
 
 Thank you for trusting us! We hope you have a wonderful time!
-	`, user.Name, car.Model, b.StartDate, b.StartTime, b.EndDate, b.EndTime, payment.Amount)
+	`, emailDetails.Name, emailDetails.Model, emailDetails.Date, emailDetails.StartTime, emailDetails.EndTime, emailDetails.Amount)
 
-	isEmailSent, err := emailService.SendEmail(user.EmailAddr, "Payment Confirmed", messageBody)
+	isEmailSent, err := emailService.SendEmail(emailDetails.EmailAddr, "Payment Confirmed", messageBody)
 	if err != nil {
 		log.Fatalf("Error sending email: %s", err)
 	}

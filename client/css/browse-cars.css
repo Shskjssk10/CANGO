@@ -29,7 +29,7 @@ body {
     align-items: center;
 }
 
-.navbar a.link{
+.navbar a.link {
     text-decoration: none;
     color: white;
     margin-right: 15px;
@@ -60,107 +60,75 @@ body {
     cursor: pointer;
 }
 
-/* Hero Section */
-main {
-    padding: 0% 10%;
-}
-
-.hero {
+/* Browse Section */
+.browse {
+    padding: 40px 10%;
     text-align: center;
-    padding: 50px 20px;
 }
 
-.hero h1 {
+.browse h1 {
     font-size: 2.5rem;
-    margin-bottom: 20px;
+    margin-bottom: 30px;
 }
 
-.hero p {
-    font-size: 1.2rem;
-    color: #555;
+/* Car List Styles */
+.car-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
 }
 
-/* Booking Section */
-.booking {
-    padding: 50px 20px;
-    text-align: center;
+.car-card {
+    display: flex;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    width: 60%;
+    max-width: 800px;
 }
 
-.booking h1{
-    margin-bottom: 20px;
-    font-size: 2rem;
-    text-align: center;
+.car-card img {
+    width: 40%;
+    height: auto;
+    object-fit: cover;
 }
 
-.booking p {
-    font-size: 1.2rem;
-    color: #555;
-}
-
-/* Card Container */
-.card-container {
+.car-card-content {
+    margin-left: 20px;
+    padding: 15px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    margin-top: 20px;
+    align-items: start;
+    justify-content: space-between;
+    width: 100%;
 }
 
-/* Card Styles (Horizontal Layout) */
-.card {
-    display: flex;
-    align-items: center;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 60%; /* Takes 60% of the screen width */
-    max-width: 1000px; /* Max width for larger screens */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    transition: transform 0.3s ease;
-}
-
-.card:hover {
-    transform: translateY(-10px);
-}
-
-.card-image {
-    width: 35%;
-    height: auto;
-    border-radius: 8px;
-    margin-right: 20px;
-}
-
-.card-details {
-    width: 65%;
-    padding: 0px 30px;
-}
-
-.card-title {
+.car-card-content h2 {
     font-size: 1.5rem;
-    font-weight: bold;
-    color: #333;
     margin-bottom: 10px;
 }
 
-.card-rate, .card-model, .card-time, .card-date {
-    color: #555;
-    margin-bottom: 10px;
+.car-card-content p {
     font-size: 1rem;
+    color: #555;
+    margin-bottom: 5px;
 }
 
-.btn-view-details {
+.view-details-btn {
+    padding: 10px 15px;
     background-color: #3255ED;
     color: white;
+    text-align: center;
     border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
-    width: 100%;
-    margin-top: 15px;
     font-size: 1rem;
+    margin-top: 10px;
+    width: 100%;
 }
 
-.btn-view-details:hover {
-    background-color: #1d3b92;
+.view-details-btn:hover {
+    background-color: #273bb5;
 }

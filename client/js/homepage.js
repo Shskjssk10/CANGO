@@ -20,6 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Error:", error.message);
     }
 
+    sessionStorage.setItem("User", JSON.stringify(user))
+
     document.querySelector("#welcome").innerHTML = `Welcome ${user.Name}`
     
 });

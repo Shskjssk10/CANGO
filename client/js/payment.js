@@ -1,7 +1,12 @@
-const stripe = Stripe("pk_live_51QRx0kG1MaTqtP836OI6SN7m2MUTT9VjsJuCYH76ByARCNvMiFX0HZQi67TNCLZfYgkgs70wJrHHfodJ3daPItIh00GjYaV6A5");
+const stripe = Stripe("pk_test_51QRx0kG1MaTqtP83A1bjOVMHB8mwcVhkQXB78H4P09xvzdujOBWNPecVloIGJQqPxp9vGZRJNtqllzBw83IzG80300ScbDBaxz");
 
 // The items the customer wants to buy
-const items = [{ id: "xl-tshirt", amount: 100 }];
+let payment = JSON.parse(sessionStorage.getItem("PaymentDetails"));
+
+console.log(payment)
+console.log(payment.Amount*100)
+
+const items = [{ id: "xl-tshirt", amount: parseInt(payment.Amount) * 100 }];
 
 let elements;
 
@@ -44,7 +49,7 @@ async function handleSubmit(e) {
         elements,
         confirmParams: {
         // Make sure to change this to your payment completion page
-        return_url: "http://127.0.0.1:5500/static/complete.html",
+        return_url: "http://127.0.0.1:5500/client/html/complete.html",
         },
     });
 
