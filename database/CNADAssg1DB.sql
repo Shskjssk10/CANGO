@@ -56,6 +56,7 @@ CREATE TABLE Booking (
     EndTime TIME NOT NULL,
     UserID INT NOT NULL,
     CarID INT NOT NULL, 
+    Model VARCHAR(20) NOT NULL,
     PaymentID INT NOT NULL, 
     
 	FOREIGN KEY(UserID) REFERENCES User(UserID),
@@ -67,7 +68,8 @@ CREATE TABLE Booking (
 -- Inserting data into User table
 INSERT INTO User (Name, EmailAddr, ContactNo, MemberTier, PasswordHash, IsActivated, VerificationCodeHash)
 VALUES 
-('John Doe', 'johndoe@gmail.com', '12345678', 'Premium', 'hashed_password1', 1, 'hash2'),
+('John Doe', 'johndoe@gmail.com', '21212121', 'Premium', 'hashed_password1', 1, 'hash2'),
+('Cassie', 'unknownsentinel08@gmail.com', '12345678', 'Premium', '$2a$10$hoEOy0Me9RNwxsFyTx2/S.WsNPV0WmS9jCAAwe6zDpiAs9NfwmwZK', 1, 'hash2'),
 ('Jane Smith', 'jane@example.com', '87654321', 'Basic', 'hashed_password2', 1, 'hash3'),
 ('Michael Jones', 'michael@example.com', '98765432', 'VIP', 'hashed_password3', 1, 'hash4');
 
@@ -76,6 +78,7 @@ INSERT INTO Car (Model, PlateNo, RentalRate, Location)
 VALUES 
 ('Toyota Camry', 'ABC1234', 50, 'Lorong Ah Soo'),
 ('Honda Civic', 'DEF5678', 40, 'Lorong Ah Soo'),
+('BMW Type X', 'DEF5678', 40, 'Lorong Ah Soo'),
 ('Tesla Model 3', 'GHI987', 70, 'Lorong Ah Soo');
 
 -- Inserting data into Promotion table
@@ -93,11 +96,11 @@ VALUES
 (250, 'Successful',NULL, 3, 3);
 
 -- Inserting data into Booking table
-INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, PaymentID)
+INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, Model, PaymentID)
 VALUES 
-('2024-06-01', '09:00:00', '17:00:00', 1, 1, 1),
-('2024-06-15', '10:00:00', '16:00:00', 2, 2, 2),
-('2024-07-01', '11:00:00', '15:00:00', 3, 3, 3);
+('2024-06-01', '09:00:00', '17:00:00', 1, 1, 'Toyota Camry', 1),
+('2024-06-15', '10:00:00', '16:00:00', 2, 2, 'Honda Civic', 2),
+('2024-07-01', '11:00:00', '15:00:00', 3, 3, 'BMW Type X', 3);
 
 DELIMITER //
 CREATE TRIGGER updatePaymentOnBookingDelete

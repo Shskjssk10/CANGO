@@ -44,6 +44,7 @@ type Booking struct {
 	EndTime   string
 	Date      string
 	CarID     int
+	Model     string
 	UserID    int
 	PaymentID int
 }
@@ -199,7 +200,7 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 	// Execute Query
 	var b Booking
 	query = "SELECT * FROM Booking WHERE PaymentID = ?"
-	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.Model, &b.UserID, &b.PaymentID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve booking: %v", err), http.StatusInternalServerError)
 		return

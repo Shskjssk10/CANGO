@@ -41,6 +41,7 @@ type Booking struct {
 	EndTime   string
 	Date      string
 	CarID     int
+	Model     string
 	UserID    int
 	PaymentID int
 }
@@ -226,9 +227,9 @@ func postBooking(w http.ResponseWriter, r *http.Request) {
 
 	// Posting Booking into Database
 	_, err = db.Exec(`
-		INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, PaymentID)
+		INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, Model, PaymentID)
 		VALUES 
-		(?, ?, ?, ?, ?, ?)`, newBooking.Date, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.PaymentID)
+		(?, ?, ?, ?, ?, ?, ?)`, newBooking.Date, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.Model, newBooking.PaymentID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
@@ -268,7 +269,7 @@ func getBookingByCarID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.Model, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -304,7 +305,7 @@ func getBookingByUserID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.Model, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
