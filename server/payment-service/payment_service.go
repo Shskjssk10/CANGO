@@ -217,7 +217,7 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 	messageBody = fmt.Sprintf(`
 Dear %s,
 	
-This email confirms your booking for %s on %s %s to %s and that payment of %d has been made.
+This email confirms your booking for %s on %s %s to %s and that payment of $%d has been made.
 
 Thank you for trusting us! We hope you have a wonderful time!
 	`, user.Name, car.Model, b.Date, b.StartTime, b.EndTime, payment.Amount)
