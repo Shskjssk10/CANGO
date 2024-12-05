@@ -162,47 +162,22 @@ func postPayment(w http.ResponseWriter, r *http.Request) {
 }
 
 func sendReceipt(w http.ResponseWriter, r *http.Request) {
-	// Connect to Database
-	db, err := connectToDB()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		fmt.Println("Error connecting to the database")
-		return
+	// Get Payment Details from Body
+	type Email struct {
+		Name      string
+		EmailAddr string
+		Model     string
+		Date      string
+		StartTime string
+		EndTime   string
+		Amount    int
 	}
 
-	// Get Payment Details from Body
-	var payment Payment
+	var emailDetails Email
 
-	err = json.NewDecoder(r.Body).Decode(&payment)
+	err := json.NewDecoder(r.Body).Decode(&emailDetails)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	// Read Car Details from Database
-	var car Car
-	query := "SELECT * FROM Car WHERE CarID = ?"
-	err = db.QueryRow(query, payment.CarID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate, &car.Location)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Read User Details from Database
-	var user User
-	query = "SELECT * FROM User WHERE UserID = ?"
-	err = db.QueryRow(query, payment.UserID).Scan(&user.UserID, &user.Name, &user.EmailAddr, &user.ContactNo, &user.MembershipTier, &user.PasswordHash, &user.IsActivated, &user.VerificationCodeHash)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve user: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	// Execute Query
-	var b Booking
-	query = "SELECT * FROM Booking WHERE PaymentID = ?"
-	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.Model, &b.UserID, &b.PaymentID)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to retrieve booking: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -221,9 +196,9 @@ Dear %s,
 This email confirms your booking for %s on %s %s to %s and that payment of $%d has been made.
 
 Thank you for trusting us! We hope you have a wonderful time!
-	`, user.Name, car.Model, b.Date, b.StartTime, b.EndTime, payment.Amount)
+	`, emailDetails.Name, emailDetails.Model, emailDetails.Date, emailDetails.StartTime, emailDetails.EndTime, emailDetails.Amount)
 
-	isEmailSent, err := emailService.SendEmail(user.EmailAddr, "Payment Confirmed", messageBody)
+	isEmailSent, err := emailService.SendEmail(emailDetails.EmailAddr, "Payment Confirmed", messageBody)
 	if err != nil {
 		log.Fatalf("Error sending email: %s", err)
 	}
