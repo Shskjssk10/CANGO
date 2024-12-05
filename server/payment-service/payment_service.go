@@ -35,6 +35,7 @@ type Car struct {
 	Model      string
 	PlateNo    string
 	RentalRate int
+	Location   string
 }
 
 type Booking struct {
@@ -125,18 +126,37 @@ func postPayment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Posting Payment into Database
-	_, err = db.Exec(`
-		INSERT INTO Payment (Amount, UserID, CarID)
+	result, err := db.Exec(`
+		INSERT INTO Payment (Amount, Status, UserID, CarID)
 		VALUES 
-		(?, ?, ?)`, newPayment.Amount, newPayment.UserID, newPayment.CarID)
+		(?, 'Successful', ?, ?)`, newPayment.Amount, newPayment.UserID, newPayment.CarID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
 		return
 	}
 
+	// Get the last inserted ID
+	lastInsertId, err := result.LastInsertId()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error getting last inserted ID")
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode("Payment Posted Successfully!")
+
+	// Create a response struct
+	type PaymentResponse struct {
+		PaymentID int `json:"PaymentID"`
+	}
+
+	// Create a new PaymentResponse instance
+	response := PaymentResponse{
+		PaymentID: int(lastInsertId),
+	}
+
+	json.NewEncoder(w).Encode(response)
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -161,7 +181,7 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 	// Read Car Details from Database
 	var car Car
 	query := "SELECT * FROM Car WHERE CarID = ?"
-	err = db.QueryRow(query, payment.CarID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate)
+	err = db.QueryRow(query, payment.CarID).Scan(&car.CarID, &car.Model, &car.PlateNo, &car.RentalRate, &car.Location)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve car: %v", err), http.StatusInternalServerError)
 		return

@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const amountPayable = document.getElementById('amount-payable');
     const membershipTierDisplay = document.querySelector("#membership-tier")
 
-    const carID = sessionStorage.getItem("CarID");
+    const carID = parseInt(sessionStorage.getItem("CarID"));
     let car;
 
     // Fetch car details
@@ -57,7 +57,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 selectedSlots.push(slot.value);
             }
         });
-        const amount = document.querySelector("#amount-payable")
+        const amount = parseInt(document.querySelector("#amount-payable").innerHTML);
+        console.log(amount)
         const date = document.getElementById('date').value;
 
         // Ensure all selected time slots are consecutive
@@ -69,29 +70,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             const startTime = selectedSlots[0];
             const endTime = calculateEndTime(selectedSlots);
 
-            alert(`Booking confirmed for ${date} from ${startTime} to ${endTime}. Total payable: $${calculateTotalPrice(selectedSlots.length)}`);
+            alert(`Booking is valid for ${date} from ${startTime} to ${endTime}. Total payable: $${calculateTotalPrice(selectedSlots.length)}. Redirecting to payment`);
 
             const booking = {
                 "Date": date,
                 "StartTime": startTime,
                 "EndTime": endTime,
                 "UserID": user.UserID,
-                "CarID": carID,
+                "CarID": parseInt(carID),
                 "PaymentID": null
             };
 
             const payment = {
-                "Amount": amount,
+                "Amount": parseInt(amount),
                 "UserID": user.UserID,
                 "CarID": parseInt(carID)
             }
 
-            sessionStorage.setItem("BookingDetails", booking)
-            sessionStorage.setItem("PaymentDetails", payment)
+            sessionStorage.setItem("BookingDetails", JSON.stringify(booking))
+            sessionStorage.setItem("PaymentDetails", JSON.stringify(payment))
 
-            console.log("Booking Details:", booking);
-            console.log("Payment Details:", payment);
+            // console.log("Booking Details:", booking);
+            // console.log("Payment Details:", payment);
 
+            window.location.href="payment.html"
             // Perform further actions here, like sending the booking to the server
         } else if (selectedSlots.length === 0) {
             alert('Please select at least one time slot.');
@@ -104,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function updatePrice() {
         const selectedCount = Array.from(timeSlots).filter(slot => slot.checked).length;
         const totalPrice = calculateTotalPrice(selectedCount);
-        amountPayable.textContent = `${totalPrice.toFixed(2)}`;
+        amountPayable.textContent = `${totalPrice}`;
     }
 
     // Calculate total price
