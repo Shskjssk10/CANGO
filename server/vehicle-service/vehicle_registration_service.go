@@ -268,7 +268,7 @@ func getBookingByCarID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -304,7 +304,7 @@ func getBookingByUserID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.UserID, &b.CarID, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
