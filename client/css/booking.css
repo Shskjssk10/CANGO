@@ -88,6 +88,9 @@ body {
 
 .car-image {
     flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .booking-form {
