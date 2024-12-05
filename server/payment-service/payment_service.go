@@ -41,8 +41,7 @@ type Booking struct {
 	BookingID int
 	StartTime string
 	EndTime   string
-	StartDate string
-	EndDate   string
+	Date      string
 	CarID     int
 	UserID    int
 	PaymentID int
@@ -180,7 +179,7 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 	// Execute Query
 	var b Booking
 	query = "SELECT * FROM Booking WHERE PaymentID = ?"
-	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+	err = db.QueryRow(query, payment.PaymentID).Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve booking: %v", err), http.StatusInternalServerError)
 		return
@@ -198,10 +197,10 @@ func sendReceipt(w http.ResponseWriter, r *http.Request) {
 	messageBody = fmt.Sprintf(`
 Dear %s,
 	
-This email confirms your booking for %s from %s %s to %s %s and that payment of %d has been made.
+This email confirms your booking for %s on %s %s to %s and that payment of %d has been made.
 
 Thank you for trusting us! We hope you have a wonderful time!
-	`, user.Name, car.Model, b.StartDate, b.StartTime, b.EndDate, b.EndTime, payment.Amount)
+	`, user.Name, car.Model, b.Date, b.StartTime, b.EndTime, payment.Amount)
 
 	isEmailSent, err := emailService.SendEmail(user.EmailAddr, "Payment Confirmed", messageBody)
 	if err != nil {
