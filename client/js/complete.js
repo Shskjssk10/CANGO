@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', async () => {
-
     document.getElementById("verify-form").addEventListener("submit", (event) => {
         event.preventDefault();
         window.location.href = "homepage.html"
@@ -8,6 +7,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let booking = JSON.parse(sessionStorage.getItem("BookingDetails"));
     const payment = JSON.parse(sessionStorage.getItem("PaymentDetails"));
 
+    const user = JSON.parse(sessionStorage.getItem("User"));
     console.log(payment)
 
     // Post Payment
@@ -62,10 +62,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Send Confirmation Email
     const confirmationDetails = {
-        "PaymentID": parseInt(paymentResult.PaymentID),
-        "Amount": payment.Amount,
-        "UserID": booking.UserID,
-        "CarID": booking.CarID
+        "Name": user.Name,
+        "EmailAddr": user.EmailAddr,
+        "Model": booking.Model,
+        "Date": booking.Date,
+        "StartTime": booking.StartTime,
+        "EndTime": booking.EndTime,
+        "Amount": payment.Amount
     }
 
     console.log(confirmationDetails);

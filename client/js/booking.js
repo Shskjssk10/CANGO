@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 "EndTime": endTime,
                 "UserID": user.UserID,
                 "CarID": parseInt(carID),
+                "Model": car.Model,
                 "PaymentID": null
             };
 
@@ -115,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (discount == "No") {
             return slotCount * ratePerSession;
         } else {
-            return slotCount * ratePerSession * (parseInt(discount)/100)
+            return slotCount * ratePerSession * ((100-parseInt(discount))/100)
         }
     }
 
