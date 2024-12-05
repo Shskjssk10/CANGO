@@ -32,10 +32,17 @@
 
                 <label for="time">Select Time Slots:</label>
                 <div class="time-slots">
-                    <label><input type="checkbox" value="0900-1200" name="timeslot"> 0900 - 1200</label>
-                    <label><input type="checkbox" value="1200-1500" name="timeslot"> 1200 - 1500</label>
-                    <label><input type="checkbox" value="1500-1800" name="timeslot"> 1500 - 1800</label>
-                    <label><input type="checkbox" value="1800-2100" name="timeslot"> 1800 - 2100</label>
+                    <label><input type="checkbox" value="09:00:00" name="timeslot"> 0900</label>
+                    <label><input type="checkbox" value="12:00:00" name="timeslot"> 1200</label>
+                    <label><input type="checkbox" value="15:00:00" name="timeslot"> 1500</label>
+                    <label><input type="checkbox" value="18:00:00" name="timeslot"> 1800</label>
+                </div>
+                <label for="time">Amount Payable:</label>
+                <div class="total">
+                    <p>Membership: </p><p id="membership-tier"> Basic</p>
+                </div>
+                <div class="total">
+                    <p>Total: $</p><p id="amount-payable">0.00</p>
                 </div>
 
                 <button type="submit" class="submit-btn">Confirm Booking</button>

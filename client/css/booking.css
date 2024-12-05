@@ -147,3 +147,13 @@ body {
 .submit-btn:hover {
     background-color: #2339b0;
 }
+
+.total {
+    display: flex;
+    flex-direction: row;
+}
+
+#membership-tier {
+    display: flex;
+    flex-direction: row;
+}

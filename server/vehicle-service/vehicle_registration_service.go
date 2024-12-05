@@ -39,8 +39,7 @@ type Booking struct {
 	BookingID int
 	StartTime string
 	EndTime   string
-	StartDate string
-	EndDate   string
+	Date      string
 	CarID     int
 	UserID    int
 	PaymentID int
@@ -227,9 +226,9 @@ func postBooking(w http.ResponseWriter, r *http.Request) {
 
 	// Posting Booking into Database
 	_, err = db.Exec(`
-		INSERT INTO Booking (StartDate, EndDate, StartTime, EndTime, UserID, CarID, PaymentID)
+		INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, PaymentID)
 		VALUES 
-		(?, ?, ?, ?, ?, ?, ?)`, newBooking.StartDate, newBooking.EndDate, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.PaymentID)
+		(?, ?, ?, ?, ?, ?)`, newBooking.Date, newBooking.StartTime, newBooking.EndTime, newBooking.UserID, newBooking.CarID, newBooking.PaymentID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with creation")
@@ -269,7 +268,7 @@ func getBookingByCarID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -305,7 +304,7 @@ func getBookingByUserID(w http.ResponseWriter, r *http.Request) {
 
 	for rows.Next() {
 		var b Booking
-		_ = rows.Scan(&b.BookingID, &b.StartDate, &b.EndDate, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
+		_ = rows.Scan(&b.BookingID, &b.Date, &b.StartTime, &b.EndTime, &b.CarID, &b.UserID, &b.PaymentID)
 		listOfBooking = append(listOfBooking, b)
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -338,8 +337,8 @@ func updateBooking(w http.ResponseWriter, r *http.Request) {
 	// Execute Query
 	_, err = db.Exec(`
 		UPDATE Booking
-		SET StartDate = ?, EndDate = ?, StartTime = ?, EndTime = ?
-		WHERE BookingID = ?`, newBooking.StartDate, newBooking.EndDate, newBooking.StartTime, newBooking.EndTime, bookingID)
+		SET Date = ?, StartTime = ?, EndTime = ?
+		WHERE BookingID = ?`, newBooking.Date, newBooking.StartTime, newBooking.EndTime, bookingID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		fmt.Println("Something went wrong with updating")
