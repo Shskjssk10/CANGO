@@ -113,3 +113,46 @@ BEGIN
 END;
 //
 DELIMITER ;
+
+DELIMITER //
+
+CREATE PROCEDURE CheckBookingValidity (
+    IN newDate DATE,
+    IN newStartTime TIME,
+    IN newEndTime TIME,
+    IN newCarID INT,
+    OUT statusCode INT,
+    OUT resultMessage VARCHAR(255)
+)
+BEGIN
+    -- Declare a variable to count conflicting bookings
+    DECLARE conflictCount INT;
+
+    -- Check for time conflicts on the same date and car
+    SELECT COUNT(*)
+    INTO conflictCount
+    FROM Booking
+    WHERE 
+        Date = newDate 
+        AND CarID = newCarID
+		AND (
+            -- Overlapping time conditions, excluding exact end-to-start or start-to-end cases
+            (newStartTime < EndTime AND newStartTime >= StartTime) 
+            OR (newEndTime > StartTime AND newEndTime <= EndTime)
+            OR (newStartTime < StartTime AND newEndTime > EndTime)
+        );
+
+    -- If there's a conflict, set the result message and do not insert the booking
+    IF conflictCount > 0 THEN
+		SET statusCode = 401;
+        SET resultMessage = 'Booking failed: Time slot conflicts with an existing booking.';
+    ELSE
+		SET statusCode = 200;
+        SET resultMessage = 'Booking is Valid.';
+    END IF;
+    
+    SELECT statusCode, resultMessage;
+END;
+//
+
+DELIMITER ;
