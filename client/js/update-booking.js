@@ -23,13 +23,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Error:", error.message);
     }
 
-    // Add event listener to time slots for price calculation
-    timeSlots.forEach(slot => {
-        slot.addEventListener('change', () => {
-            updatePrice();
-        });
-    });
-
     // Event listener for booking confirmation
     submitButton.addEventListener('click', async () => {
         const selectedSlots = [];
@@ -49,33 +42,67 @@ document.addEventListener('DOMContentLoaded', async () => {
             const startTime = selectedSlots[0];
             const endTime = calculateEndTime(selectedSlots);
 
-            alert(`Booking is valid for ${date} from ${startTime} to ${endTime}. Booking is now being updated!`);
-
-            const newBooking = {
-                "StartTime": startTime,
+            const details = {
+                "Date": date,
+                "StartTime": startTime, 
                 "EndTime": endTime,
-                "Date": date
+                "CarID": booking.CarID
             }
 
-            // Update Booking
+            // Check Booking Validity
             try {
-                const response = await fetch(`http://127.0.0.1:8001/api/v1/booking/${bookingID}`, {
-                    method: 'PUT',
+                const response = await fetch("http://127.0.0.1:8001/api/v1/checkValidity", {
+                    method: "PUT",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(newBooking),
+                    body: JSON.stringify(details),
                 });
+
                 if (!response.ok) {
-                    throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+                    throw new Error(`Failed to check booking: ${response.status} ${response.statusText}`);
                 }
+
+                const result = await response.json(); // Parse the JSON response
+                console.log("Booking Checked successfully:", result);
+
+                // If Valid
+                if (result.StatusCode == 200) {
+                    alert(`Booking is valid for ${date} from ${startTime} to ${endTime}. Booking is now being updated!`);
+
+                    const newBooking = {
+                        "StartTime": startTime,
+                        "EndTime": endTime,
+                        "Date": date
+                    }
+        
+                    // Update Booking
+                    try {
+                        const response = await fetch(`http://127.0.0.1:8001/api/v1/booking/${bookingID}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(newBooking),
+                        });
+                        if (!response.ok) {
+                            throw new Error(`Network response was not ok: ${response.status} ${response.statusText}`);
+                        }
+                    } catch (error) {
+                        console.log("Error:", error.message);
+                    }
+        
+                    alert("Booking has been successfully updated!")
+                    window.location.href="view-history.html"
+        
+                } else {
+                    alert("This booking is invalid as it clashes with another booking!")
+                }
+
             } catch (error) {
-                console.log("Error:", error.message);
+                console.error("Error:", error.message);
+                alert("Registration Failed")
             }
-
-            alert("Booking has been successfully updated!")
-            window.location.href="view-history.html"
-
         } else if (selectedSlots.length === 0) {
             alert('Please select at least one time slot.');
         } else {

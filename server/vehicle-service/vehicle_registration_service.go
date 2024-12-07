@@ -87,6 +87,7 @@ func main() {
 	router.HandleFunc("/api/v1/car/{id}", updateCarLocation).Methods("PUT")
 
 	router.HandleFunc("/api/v1/booking", postBooking).Methods("POST")
+	router.HandleFunc("/api/v1/checkValidity", checkBookingValidity).Methods("PUT")
 	router.HandleFunc("/api/v1/booking/{id}", getBooking).Methods("GET")
 	router.HandleFunc("/api/v1/booking/{id}", updateBooking).Methods("PUT")
 	router.HandleFunc("/api/v1/booking/{id}", deleteBooking).Methods("DELETE")
@@ -240,6 +241,53 @@ func postBooking(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode("Booking Posted Successfully!")
 	w.WriteHeader(http.StatusOK)
+}
+
+// Check Validity of Booking
+func checkBookingValidity(w http.ResponseWriter, r *http.Request) {
+	// Connect to Database
+	db, err := connectToDB()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Error connecting to the database")
+		return
+	}
+
+	type BookingDetails struct {
+		Date      string
+		StartTime string
+		EndTime   string
+		CarID     int
+	}
+
+	type resultMessage struct {
+		StatusCode    int
+		ResultMessage string
+	}
+
+	// Read Data from Body
+	var booking BookingDetails
+	err = json.NewDecoder(r.Body).Decode(&booking)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	// Calling Stored Procedure
+	var result resultMessage
+	err = db.QueryRow(`
+			CALL CheckBookingValidity(?, ?, ?, ?, @statusCode, @resultMessage)
+			`, booking.Date, booking.StartTime, booking.EndTime, booking.CarID).Scan(&result.StatusCode, &result.ResultMessage)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		fmt.Println("Something went wrong with checking")
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(result)
+	w.WriteHeader(http.StatusOK)
+
 }
 
 // Get Specific Booking
