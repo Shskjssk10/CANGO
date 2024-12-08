@@ -2,7 +2,7 @@
 
 ## Architecture Diagram
 
- ![Updated-Architecture-Diagram](/client/images/Updated-Architecture-Diagram.png. )
+ ![Updated-Architecture-Diagram](/client/images/Updated-Architecture-Diagram.png)
 
 ## Design Considerations
 
