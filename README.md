@@ -57,3 +57,8 @@ address is limited to the owner of the email.
 
 > [!NOTE]
 > Ensure Moesif Origin/CORS Changer extension is activated!
+
+## Future Implementations
+
+- Host database on cloud
+- Containerise application and deploy on cloud
