@@ -1,4 +1,5 @@
 # CNAD_Assg1
+This project aims to build on my knowledge of microservices, as well as improve my fluency in Golang.
 
 ## Architecture Diagram
 
