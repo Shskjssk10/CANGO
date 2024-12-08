@@ -98,9 +98,9 @@ VALUES
 -- Inserting data into Booking table
 INSERT INTO Booking (Date, StartTime, EndTime, UserID, CarID, Model, PaymentID)
 VALUES 
-('2024-06-01', '09:00:00', '17:00:00', 1, 1, 'Toyota Camry', 1),
-('2024-06-15', '10:00:00', '16:00:00', 2, 2, 'Honda Civic', 2),
-('2024-07-01', '11:00:00', '15:00:00', 3, 3, 'BMW Type X', 3);
+('2024-12-20', '09:00:00', '17:00:00', 1, 1, 'Toyota Camry', 1),
+('2024-12-20', '10:00:00', '16:00:00', 2, 2, 'Honda Civic', 2),
+('2024-12-20', '11:00:00', '15:00:00', 3, 3, 'BMW Type X', 3);
 
 DELIMITER //
 CREATE TRIGGER updatePaymentOnBookingDelete
