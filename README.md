@@ -1,5 +1,9 @@
 # CNAD_Assg1
 
+## Architecture Diagram
+
+ ![Updated Architecture Diagram](/client/images/Updated-Architecture-Diagram.png. jpg)
+
 ## Design Considerations
 
 **1. Microservice Breakdown**
@@ -46,7 +50,8 @@ address is limited to the owner of the email.
 4. Navigate to the following directory .\CNAD_Assg1\
 5. Run the following command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted"
 6. Run .\start-services.ps1\
-7. Navigate to .\client\html\ and run index.html with live server. 
+7. Navigate to .\client\html\ and run index.html with live server.
+8. To kill the microservices, kill the terminal
 
 > [!NOTE]
 > Ensure Moesif Origin/CORS Changer extension is activated!
