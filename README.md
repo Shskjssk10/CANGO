@@ -47,4 +47,6 @@ address is limited to the owner of the email.
 5. Run the following command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted"
 6. Run .\start-services.ps1\
 7. Navigate to .\client\html\ and run index.html with live server. 
-8. Ensure Moesif Origin/CORS Changer extension is activated!
+
+> [!NOTE]
+> Ensure Moesif Origin/CORS Changer extension is activated!
