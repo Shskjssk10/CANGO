@@ -38,3 +38,13 @@ All microservices are stored under the 'server' folder
 * Passwords are hashed before stored into database. Sending verification codes via email is also implemented to ensure that the use of email
 address is limited to the owner of the email. 
 
+## Instructions for setting up
+
+1. Clone Repository
+2. Run database in MySQL Workbench
+3. Add .env file under the CNAD_Assg1 folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link)
+4. Navigate to the following directory .\CNAD_Assg1\
+5. Run the following command "Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted"
+6. Run .\start-services.ps1\
+7. Navigate to .\client\html\ and run index.html with live server. 
+8. Ensure Moesif Origin/CORS Changer extension is activated!
