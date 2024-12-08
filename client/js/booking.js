@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // Event listener for booking confirmation
-    submitButton.addEventListener('click', () => {
+    submitButton.addEventListener('click', async () => {
         const selectedSlots = [];
         timeSlots.forEach(slot => {
             if (slot.checked) {
@@ -70,31 +70,61 @@ document.addEventListener('DOMContentLoaded', async () => {
             const startTime = selectedSlots[0];
             const endTime = calculateEndTime(selectedSlots);
 
-            alert(`Booking is valid for ${date} from ${startTime} to ${endTime}. Total payable: $${calculateTotalPrice(selectedSlots.length)}. Redirecting to payment`);
-
-            const booking = {
+            const details = {
                 "Date": date,
-                "StartTime": startTime,
+                "StartTime": startTime, 
                 "EndTime": endTime,
-                "UserID": user.UserID,
-                "CarID": parseInt(carID),
-                "Model": car.Model,
-                "PaymentID": null
-            };
-
-            const payment = {
-                "Amount": parseInt(amount),
-                "UserID": user.UserID,
-                "CarID": parseInt(carID)
+                "CarID": carID
             }
 
-            sessionStorage.setItem("BookingDetails", JSON.stringify(booking))
-            sessionStorage.setItem("PaymentDetails", JSON.stringify(payment))
+            // Check Booking Validity
+            try {
+                const response = await fetch("http://127.0.0.1:8001/api/v1/checkValidity", {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(details),
+                });
 
-            // console.log("Booking Details:", booking);
-            // console.log("Payment Details:", payment);
+                if (!response.ok) {
+                    throw new Error(`Failed to check booking: ${response.status} ${response.statusText}`);
+                }
 
-            window.location.href="payment.html"
+                const result = await response.json(); // Parse the JSON response
+                console.log("Booking Checked successfully:", result);
+
+                if (result.StatusCode == 200) {
+                    alert(`Booking is valid for ${date} from ${startTime} to ${endTime}. Total payable: $${calculateTotalPrice(selectedSlots.length)}. Redirecting to payment`);
+
+                    const booking = {
+                        "Date": date,
+                        "StartTime": startTime,
+                        "EndTime": endTime,
+                        "UserID": user.UserID,
+                        "CarID": parseInt(carID),
+                        "Model": car.Model,
+                        "PaymentID": null
+                    };
+
+                    const payment = {
+                        "Amount": parseInt(amount),
+                        "UserID": user.UserID,
+                        "CarID": parseInt(carID)
+                    }
+
+                    sessionStorage.setItem("BookingDetails", JSON.stringify(booking))
+                    sessionStorage.setItem("PaymentDetails", JSON.stringify(payment))
+
+                    window.location.href="payment.html"
+                } else {
+                    alert("This booking is invalid as it clashes with another booking!")
+                }
+
+            } catch (error) {
+                console.error("Error:", error.message);
+                alert("Registration Failed")
+            }
             // Perform further actions here, like sending the booking to the server
         } else if (selectedSlots.length === 0) {
             alert('Please select at least one time slot.');
