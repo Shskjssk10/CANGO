@@ -29,12 +29,12 @@ All microservices are stored under the 'server' folder
 
 
 **2. Shared Database:**
-All microservices share a single database for data consistency and efficient data access.
+* All microservices share a single database for data consistency and efficient data access.
 
 **3. Independent Deployment:**
-Each microservice is deployed independently, allowing for flexible scaling and updates without affecting other services.
+* Each microservice is deployed independently, allowing for flexible scaling and updates without affecting other services.
 
 **4. Security:**
-Passwords are hashed before stored into database. Sending verification codes via email is also implemented to ensure that the use of email
+* Passwords are hashed before stored into database. Sending verification codes via email is also implemented to ensure that the use of email
 address is limited to the owner of the email. 
 
