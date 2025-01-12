@@ -47,7 +47,7 @@ address is limited to the owner of the email.
 
 1. Clone Repository
 2. Run database in MySQL Workbench
-3. Add .env file under the CNAD_Assg1 folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link)
+3. Add .env file under the CNAD_Assg1/server folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link)
 4. Navigate to the following directory ```cd .\CNAD_Assg1\```
 5. Run the following command 
 ```Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted```

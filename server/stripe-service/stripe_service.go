@@ -23,7 +23,7 @@ var port int = 8003
 func main() {
 	// Stripe Secret API KEY
 	// Getting Secret Code
-	godotenv.Load("../../.env")
+	godotenv.Load("./../.env")
 	stripe.Key = os.Getenv("STRIPE_KEY")
 
 	router := mux.NewRouter()

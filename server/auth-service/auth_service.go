@@ -227,7 +227,7 @@ func sendVerificationEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Getting Secret Code
-	godotenv.Load("../../.env")
+	godotenv.Load("./../.env")
 	var emailKey = os.Getenv("EMAIL_KEY")
 
 	// Send Email Verification Code
