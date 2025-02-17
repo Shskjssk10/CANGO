@@ -124,6 +124,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(url, corsHandler))
 }
 
+//=========================== PAYMENT RELATED TO DATABASE ===========================
+
 // Create Payment
 func postPayment(w http.ResponseWriter, r *http.Request) {
 	// Connect to Database
@@ -226,7 +228,7 @@ Thank you for trusting us! We hope you have a wonderful time!
 	}
 }
 
-// The following code are stripe functions
+//=========================== STRIPE RELATED ===========================
 
 func calculateTax(items []item, currency stripe.Currency) *stripe.TaxCalculation {
 	var lineItems []*stripe.TaxCalculationLineItemParams
