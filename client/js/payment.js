@@ -18,7 +18,7 @@ document
 
 // Fetches a payment intent and captures the client secret
 async function initialize() {
-    const response = await fetch("http://127.0.0.1:8003/api/v1/create-payment-intent", {
+    const response = await fetch("http://127.0.0.1:8002/api/v1/create-payment-intent", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items }),

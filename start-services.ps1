@@ -33,12 +33,6 @@ Write-Host "Starting Vehicle Service..."
 Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList "go run .\vehicle_registration_service.go"
 cd ..
 
-## Running of Stripe Service
-Set-Location .\stripe-service\
-Write-Host "Starting Vehicle Service..."
-Start-Process -NoNewWindow -FilePath "powershell.exe" -ArgumentList "go run .\stripe_service.go"
-cd ..
-
 # Go Back to CNAD_Assg1
 cd ..
 

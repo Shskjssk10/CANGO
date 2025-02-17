@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -13,6 +15,9 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/stripe/stripe-go/v81"
+	"github.com/stripe/stripe-go/v81/paymentintent"
+	"github.com/stripe/stripe-go/v81/tax/calculation"
 )
 
 var port int = 8002
@@ -58,6 +63,11 @@ type Payment struct {
 	CarID       int
 }
 
+type item struct {
+	Id     string
+	Amount int64
+}
+
 var db *sql.DB
 
 // Function to connect Database -- MUST BE USED AT ALL CRUD FUNCTIONS
@@ -88,6 +98,11 @@ func connectToDB() (*sql.DB, error) {
 }
 
 func main() {
+	// Stripe Secret API KEY
+	// Getting Secret Code
+	godotenv.Load("./../.env")
+	stripe.Key = os.Getenv("STRIPE_KEY")
+
 	router := mux.NewRouter()
 
 	// Test Initial Database Connection
@@ -96,6 +111,7 @@ func main() {
 	// Routes
 	router.HandleFunc("/api/v1/payment", postPayment).Methods("POST")
 	router.HandleFunc("/api/v1/paymentConfirmation", sendReceipt).Methods("POST")
+	router.HandleFunc("/api/v1/create-payment-intent", handleCreatePaymentIntent).Methods("POST")
 
 	corsHandler := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://127.0.0.1:8002"}),
@@ -207,6 +223,112 @@ Thank you for trusting us! We hope you have a wonderful time!
 		log.Println("Email Send Successfully")
 	} else {
 		log.Println("Failed to send email")
+	}
+}
+
+// The following code are stripe functions
+
+func calculateTax(items []item, currency stripe.Currency) *stripe.TaxCalculation {
+	var lineItems []*stripe.TaxCalculationLineItemParams
+	for _, item := range items {
+		lineItems = append(lineItems, buildLineItem(item))
+	}
+
+	taxCalculationParams := &stripe.TaxCalculationParams{
+		Currency: stripe.String(string(currency)),
+		CustomerDetails: &stripe.TaxCalculationCustomerDetailsParams{
+			Address: &stripe.AddressParams{
+				Line1:      stripe.String("920 5th Ave"),
+				City:       stripe.String("Seattle"),
+				State:      stripe.String("WA"),
+				PostalCode: stripe.String("98104"),
+				Country:    stripe.String("US"),
+			},
+			AddressSource: stripe.String("shipping"),
+		},
+		LineItems: lineItems,
+	}
+
+	taxCalculation, _ := calculation.New(taxCalculationParams)
+	return taxCalculation
+}
+
+func buildLineItem(i item) *stripe.TaxCalculationLineItemParams {
+	return &stripe.TaxCalculationLineItemParams{
+		Amount:    stripe.Int64(i.Amount), // Amount in cents
+		Reference: stripe.String(i.Id),    // Unique reference for the item in the scope of the calculation
+	}
+}
+
+// Securely calculate the order amount, including tax
+func calculateOrderAmount(taxCalculation *stripe.TaxCalculation) int64 {
+	// Calculate the order total with any exclusive taxes on the server to prevent
+	// people from directly manipulating the amount on the client
+	return taxCalculation.AmountTotal
+}
+
+// Actual function used for creating payment intent
+func handleCreatePaymentIntent(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		http.Error(w, http.StatusText(http.StatusMethodNotAllowed), http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		Items []item `json:"items"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("json.NewDecoder.Decode: %v", err)
+		return
+	}
+
+	// Create a Tax Calculation for the items being sold
+	taxCalculation := calculateTax(req.Items, "SGD")
+
+	// Create a PaymentIntent with amount and currency
+	params := &stripe.PaymentIntentParams{
+		Amount:   stripe.Int64(calculateOrderAmount(taxCalculation)),
+		Currency: stripe.String(string(stripe.CurrencySGD)),
+		// In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+		AutomaticPaymentMethods: &stripe.PaymentIntentAutomaticPaymentMethodsParams{
+			Enabled: stripe.Bool(true),
+		},
+	}
+
+	params.AddMetadata("tax_calculation", taxCalculation.ID)
+
+	pi, err := paymentintent.New(params)
+	log.Printf("pi.New: %v", pi.ClientSecret)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("pi.New: %v", err)
+		return
+	}
+
+	writeJSON(w, struct {
+		ClientSecret   string `json:"clientSecret"`
+		DpmCheckerLink string `json:"dpmCheckerLink"`
+	}{
+		ClientSecret: pi.ClientSecret,
+		// [DEV]: For demo purposes only, you should avoid exposing the PaymentIntent ID in the client-side code.
+		DpmCheckerLink: fmt.Sprintf("https://dashboard.stripe.com/settings/payment_methods/review?transaction_id=%s", pi.ID),
+	})
+}
+
+func writeJSON(w http.ResponseWriter, v interface{}) {
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(v); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Printf("json.NewEncoder.Encode: %v", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if _, err := io.Copy(w, &buf); err != nil {
+		log.Printf("io.Copy: %v", err)
+		return
 	}
 }
 
