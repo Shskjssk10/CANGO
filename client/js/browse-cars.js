@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h2>${car.Model}</h2>
                 <p>CANGO newly bought car! Be sure to book it soon!!! </p>
                 <p><strong>Rental Rate</strong>: $${car.RentalRate}/hr</p>
+                <p><strong>Current Location</strong>: ${car.Location}</p>
                 <button class="view-details-btn" data-car-id="${car.CarID}">Book Now!</button>
             </div>
         `;
