@@ -155,4 +155,6 @@ BEGIN
 END;
 //
 
+CREATE INDEX idx_carid ON Booking (CarID);
+
 DELIMITER ;
