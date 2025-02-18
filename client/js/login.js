@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const result = await response.json(); // Parse the JSON response
                 console.log("Login successfully:", result);
                 alert("Login Successful")
-                window.location.href = "homepage.html"
+                window.location.href = "./html/homepage.html"
             } catch (error) {
                 alert("Login Unsuccessful - Wrong Email or Password")
                 console.error("Error:", error.message);
@@ -41,6 +41,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('registerBtn').addEventListener('click', function() {
         alert('Redirecting to the registration page.');
         // Simulate redirect
-        window.location.href = '/register'; // Replace with actual registration page URL
+        window.location.href = './html/register.html'; // Replace with actual registration page URL
     });
 });
