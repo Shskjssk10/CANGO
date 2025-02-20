@@ -13,8 +13,8 @@ http://localhost:8004/api/v1/
 
 The following is the list of endpoints for this API:
 - [Test DB Connection](#test-db-connection)
-- [Register User](#register-user)
-- [Login User](#login-user)
+- [Get User Info](#get-user-info)
+- [Update User Info](#update-user-info)
 
 ---
 ### Test DB Connection
@@ -27,7 +27,7 @@ The following is the list of endpoints for this API:
 
 ---
 
-### Get User Information
+### Get User Info
 - Endpoints: `/getUser/{email}`
 - Method: `GET`
 - Description: Gets user information
