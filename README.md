@@ -31,7 +31,7 @@ All microservices are stored under the 'server' folder
     * Interacts with the payment-service for user payment of booking.
 
 
-**2. Shared Database:**
+### **2. Shared Database:**
 
 All microservices share a single database, where all read and write operations are done. This is done for the following reasons:
 
@@ -44,10 +44,10 @@ All microservices share a single database, where all read and write operations a
     * Minimises risk of data inconsistencies and conflicts
     * Eliminates the complexity of implementing data synchronization mechanisms between microservices.
 
-**3. Independent Deployment:**
+### **3. Independent Deployment:**
 * Each microservice is deployed independently, allowing for flexible scaling and updates without affecting other services.
 
-**4. Security:**
+### **4. Security:**
 * **Authentication:** Passwords are hashed before stored into database. This ensures that even in the scenario of a security breach, malicious users are unable to sign in as other users. Password hashing are done using bcrypt. 
 * **Verification:** Verification is conducted when a user first signs up for an account, where a verification code is sent to the user's email. This code is then hashed when inputted and compared to the hashed code in the system. This ensures that the user is verified and is the legitimate owner signing up for an account, adding an additional layer of security.
 
@@ -56,9 +56,7 @@ All microservices share a single database, where all read and write operations a
 1. Clone Repository
 2. Run database in MySQL Workbench
 3. Add .env file under the CNAD_Assg1/server folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link)
-4. Navigate to the following directory 
-
-```cd .\CNAD_Assg1\```
+4. Navigate to the following directory ```cd \CNAD_Assg1\```
 5. Run the following command 
 ```Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted```
 6. Run 
