@@ -6,9 +6,9 @@ In an era marked by sustainable transportation and shared economies, electric ca
 ## Table of Contents
 1. [Architecture Diagram](#architecture-diagram)
 2. [Design Considerations](#design-considerations)
-    a. [Microservice Breakdown](#1-microservice-breakdown)
-    b. [Database Design](#2-shared-database)
-    c. [Security](#3-security)
+    - [Microservice Breakdown](#1-microservice-breakdown)
+    - [Database Design](#2-shared-database)
+    - [Security](#3-security)
 3. [Installation Guide](#installation-guide)
 4. [API Documentation](#api-documentation)
 5. [Future Implementations](#future-implementations)
