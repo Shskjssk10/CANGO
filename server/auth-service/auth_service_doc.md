@@ -97,3 +97,7 @@ The following is the list of endpoints for this API:
     - `401 Unauthorised`: Invalid verification code
 
 ---
+
+## Return
+
+[Click on this link to return to parent README.md](../../README.md)
