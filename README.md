@@ -1,9 +1,21 @@
 # CANGO
+---
+
+## Introduction 
 In an era marked by sustainable transportation and shared economies, electric carsharing platforms have emerged as a cornerstone of modern urban mobility. This project aims to design and implement a fully functional electric car-sharing system using Go, with features catering to diverse user needs and real-world application scenarios. With an emphasis on practical and scalable solutions, the system includes user membership tiers, promotional discounts, and an accurate billing mechanism. 
 
-## Architecture Diagram
+## Table of Contents
+1. [Architecture Diagram](#architecture-diagram)
+2. [Design Considerations](#design-considerations)
+    a. [Microservice Breakdown](#1-microservice-breakdown)
+    b. [Database Design](#2-shared-database)
+    c. [Security](#3-security)
+3. [Setting Up](#setting-up)
+4. [Documentation](#documentation)
+5. [Future Implementations](#future-implementations)
+---
 
- ![Updated-Architecture-Diagram](/client/images/Updated-Architecture-Diagram.png)
+## Architecture Diagram
 
 ## Design Considerations
 
@@ -44,14 +56,11 @@ All microservices share a single database, where all read and write operations a
     * Minimises risk of data inconsistencies and conflicts
     * Eliminates the complexity of implementing data synchronization mechanisms between microservices.
 
-### **3. Independent Deployment:**
-* Each microservice is deployed independently, allowing for flexible scaling and updates without affecting other services.
-
-### **4. Security:**
+### **3. Security:**
 * **Authentication:** Passwords are hashed before stored into database. This ensures that even in the scenario of a security breach, malicious users are unable to sign in as other users. Password hashing are done using bcrypt. 
 * **Verification:** Verification is conducted when a user first signs up for an account, where a verification code is sent to the user's email. This code is then hashed when inputted and compared to the hashed code in the system. This ensures that the user is verified and is the legitimate owner signing up for an account, adding an additional layer of security.
 
-## Instructions for setting up
+## Setting up
 
 1. Clone Repository
 2. Run database in MySQL Workbench
@@ -66,6 +75,8 @@ All microservices share a single database, where all read and write operations a
 
 > [!NOTE]
 > Ensure Moesif Origin/CORS Changer extension is activated!
+
+## Documentation
 
 ## Future Implementations
 
