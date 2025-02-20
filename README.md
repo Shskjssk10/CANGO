@@ -43,7 +43,7 @@ All microservices are stored under the 'server' folder
     * Interacts with the payment-service for user payment of booking.
 
 
-### **2. Shared Database:**
+### **2. Shared Database**
 
 All microservices share a single database, where all read and write operations are done. This is done for the following reasons:
 
@@ -56,7 +56,7 @@ All microservices share a single database, where all read and write operations a
     * Minimises risk of data inconsistencies and conflicts
     * Eliminates the complexity of implementing data synchronization mechanisms between microservices.
 
-### **3. Security:**
+### **3. Security**
 * **Authentication:** Passwords are hashed before stored into database. This ensures that even in the scenario of a security breach, malicious users are unable to sign in as other users. Password hashing are done using bcrypt. 
 * **Verification:** Verification is conducted when a user first signs up for an account, where a verification code is sent to the user's email. This code is then hashed when inputted and compared to the hashed code in the system. This ensures that the user is verified and is the legitimate owner signing up for an account, adding an additional layer of security.
 
@@ -75,7 +75,7 @@ DB_USER = enter_user*
 DB_PASS = enter_password*
 DB_NAME = CANGO_DB
 
-* All are to be keyed in by yourself
+# All with '*' are to be inputted on your own
 ```
 4. Navigate to the following directory 
 ```
