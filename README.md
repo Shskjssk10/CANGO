@@ -1,5 +1,4 @@
 # CANGO
----
 
 ## Introduction 
 In an era marked by sustainable transportation and shared economies, electric carsharing platforms have emerged as a cornerstone of modern urban mobility. This project aims to design and implement a fully functional electric car-sharing system using Go, with features catering to diverse user needs and real-world application scenarios. With an emphasis on practical and scalable solutions, the system includes user membership tiers, promotional discounts, and an accurate billing mechanism. 
@@ -10,12 +9,13 @@ In an era marked by sustainable transportation and shared economies, electric ca
     a. [Microservice Breakdown](#1-microservice-breakdown)
     b. [Database Design](#2-shared-database)
     c. [Security](#3-security)
-3. [Setting Up](#setting-up)
-4. [Documentation](#documentation)
+3. [Installation Guide](#installation-guide)
+4. [API Documentation](#api-documentation)
 5. [Future Implementations](#future-implementations)
----
 
 ## Architecture Diagram
+
+ ![Updated-Architecture-Diagram](/client/images/Updated-Architecture-Diagram.png)
 
 ## Design Considerations
 
@@ -60,23 +60,58 @@ All microservices share a single database, where all read and write operations a
 * **Authentication:** Passwords are hashed before stored into database. This ensures that even in the scenario of a security breach, malicious users are unable to sign in as other users. Password hashing are done using bcrypt. 
 * **Verification:** Verification is conducted when a user first signs up for an account, where a verification code is sent to the user's email. This code is then hashed when inputted and compared to the hashed code in the system. This ensures that the user is verified and is the legitimate owner signing up for an account, adding an additional layer of security.
 
-## Setting up
+## Installation Guide
 
-1. Clone Repository
-2. Run database in MySQL Workbench
-3. Add .env file under the CNAD_Assg1/server folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link)
-4. Navigate to the following directory ```cd \CNAD_Assg1\```
+1. Clone Repository 
+```bash 
+git clone https://github.com/Shskjssk10/CANGO.git
+```
+2. Copy and paste database code into MySQL Workbench
+3. Add .env file under the CNAD_Assg1/server folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link). Your .env file should look something like below: 
+```env
+EMAIL_KEY = my_email_key*
+STRIPE_KEY = my_stripe_key*
+DB_USER = enter_user*
+DB_PASS = enter_password*
+DB_NAME = CANGO_DB
+
+* All are to be keyed in by yourself
+```
+4. Navigate to the following directory 
+```
+cd \CNAD_Assg1\
+```
 5. Run the following command 
-```Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted```
+```bash
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Unrestricted
+```
 6. Run 
-```.\start-services.ps1```
-7. Navigate to ```cd .\client\html\``` and run index.html with live server.
+```bash
+.\start-services.ps1
+```
+7. Navigate to client-side and run index.html with live server. Alternatively, enter  the following command:
+```bash
+cd .\client\
+```
 8. To kill the microservices, kill the terminal
 
 > [!NOTE]
 > Ensure Moesif Origin/CORS Changer extension is activated!
 
-## Documentation
+## API Documentation
+
+Detailed API documentation for each microservice is linked below: 
+
+- [Authentication Service API Documentation](./server/auth-service/auth_service_doc.md)
+    - Handles user login, authentication, verification and registering of new accounts.
+- [Payment Service API Documentation](./server/payment-service/payment_service_doc.md)
+    - Handles payments, send receipts, Stripe API integrated for secure and seamless payment
+- [User Management Service API Documentation](./server/user-management-service/user_management_service_doc.md)
+    - Retrieves user info, updates new info
+- [Vehicle Service API Documentation](./server/vehicle-service/vehicle_service_doc.md)
+    - Retrieves car info, booking, update of booking
+
+
 
 ## Future Implementations
 
