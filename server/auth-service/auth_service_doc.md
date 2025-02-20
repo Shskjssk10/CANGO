@@ -42,3 +42,17 @@ The following is the list of endpoints for this API:
     - `400 Bad Request`: Invalid Request Body
     - `500 Internal Server Error`: Email or contact no. already exists
 ---
+### Login User
+- Endpoints: `/loginUser`
+- Method: `POST`
+- Description: Logins a user
+-  Request Body:
+```json
+{
+    "Email": "johndoe@example.com",
+    "Password": "password123!"
+}
+```
+- Response:
+    - `200 OK`: Login successful
+    - `401 Unauthorised`: Invalid email or password
