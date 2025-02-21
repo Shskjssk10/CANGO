@@ -115,5 +115,9 @@ Detailed API documentation for each microservice is linked below:
 
 ## Future Implementations
 
+Proposed AWS Architecture Diagram 
+
+ ![AWS-Architecture-Diagram](/client/images/aws-architecture-diagram.png)
+
 - Host database on cloud
 - Containerise application and deploy on cloud
