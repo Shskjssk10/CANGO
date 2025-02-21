@@ -3,7 +3,7 @@ In an era marked by sustainable transportation and shared economies, electric ca
 
 ## Architecture Diagram
 
- ![Updated-Architecture-Diagram](/client/images/Updated-Architecture-Diagram.png)
+ ![Updated-Architecture-Diagram](/client/images/architecture-diagram.png)
 
 ## Design Considerations
 
