@@ -43,8 +43,17 @@ func connectToDB() (*sql.DB, error) {
 		}
 	}
 
+	// Fetching db information
+	godotenv.Load("./../.env")
+	var dbUser = os.Getenv("DB_USER")
+	var dbPassword = os.Getenv("DB_PASS")
+	var dbName = os.Getenv("DB_NAME")
+
+	// Constructing connection string
+	connectionString := fmt.Sprintf("%s:%s@tcp(127.0.0.1:3306)/%s", dbUser, dbPassword, dbName)
+
 	// If not connected or there's an error, establish a new connection
-	db, err := sql.Open("mysql", "root:Shskjssk10!@tcp(127.0.0.1:3306)/CNADAssg1DB")
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal("Error connecting to the database:", err)
 		return nil, err
