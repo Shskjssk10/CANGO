@@ -69,11 +69,11 @@ git clone https://github.com/Shskjssk10/CANGO.git
 2. Copy and paste database code into MySQL Workbench
 3. Add .env file under the CNAD_Assg1/server folder with the necessary keys (Please contact me. Unless you are my teacher grading it, it is together with the Github link). Your .env file should look something like below: 
 ```env
-EMAIL_KEY = my_email_key*
-STRIPE_KEY = my_stripe_key*
-DB_USER = enter_user*
-DB_PASS = enter_password*
-DB_NAME = CANGO_DB
+EMAIL_KEY = my_email_key
+STRIPE_KEY = my_stripe_key
+DB_USER = enter_db_user*
+DB_PASS = enter_db_password*
+DB_NAME = enter_db_name*
 
 # All with '*' are to be inputted on your own
 ```
